@@ -1,0 +1,554 @@
+/*
+Jose Nino - jnino1@jhu.edu
+Data Structures Spring 2014
+Assignment 3 README
+*/
+
+Problem 1
+Problem 1 was straightforward. StatableArray extended SimpleArray, thus enabling us to hold information in an array. This will allow us to sort things with different algorithms in Problem 2. Implementing the statable interface enabled us to use the statistics of method calls in problem 2 as a measure of effort of the sorting algorithm.
+
+TestStatableArray, is a file testing both the Array and the Statable properties of the StatableArray object with the Junit package. 
+
+Problem 2
+*Note about conditional in line 31 of BubbleSort.java: At first I thought preventing calling set when this was the case was efficient, but after some analysis I realized ittle efficiency added. If the value does not need to be moved dont call the set method. However, it does not happen at all in worst case and for the random.data file only happened 10 times in 10000 values, decided not to use the comparison. Would only be beneficial for best case, but we cant code algorithms based on best scenario performance. 
+
+First, I reordered the reverse.data (Using BubbleSortR.java) and the sorted.data files by adding a FileWriter to the Run.java file (Submitted as Run_altered). I did this because the Run.java code utilizes compareTo methods of the String class, which orders numbers "alphabetically". This means that for the sorted.data file for instance, the order wouldnt be 0,1,2,3,4,... but something like 0,1,10,100,.... Therefore I ordered the data files in this manner, and kept the Array types as Strings. 
+
+Sorting Algorithms Testing
+--------------------------
+To test and compare my three sorting algorithms, namely SelectionSort, InsertionSort, and BubbleSort I ran 9 tests that I would expect give me enough data to analyze them. The nine tests were: running each of the three data sets with 100 items, 1000 items, 10000 items. My logic behind this nine tests is the following. Of course I need to run all three algorithms in all three data sets (sorted, reverse, and random) because this enables me to compare the three algorithms strengths and weaknesses in terms of the quality of order of the data. Moreover, I decided to run it on 100, 1000, 10000 items because this would enable me to compare how the algorithms scale up based on the number of items that they have to sort. 
+
+The results from the nine tests are printed below Problem 3 under the title 'DATA FROM PROBLEM 2'. I have summarized the results in the following table. 
+
+TIME IN SECONDS
+
+#items		 100	    1000	   10000
+========================================
+Sorted.data
+----------------------------------------
+Select	0.007163	0.00561		0.329576
+Bubble	0.000112	0.000414	0.001583
+Insert	0.000183	0.002232	0.002231
+
+Reverse.data
+----------------------------------------			
+Select	0.004829	0.018611	0.447358
+Bubble	0.002936	0.021273	0.645561
+Insert	0.001229	0.015675	0.472053
+			
+Random.data
+----------------------------------------
+Select	0.004138	0.01952		0.044736
+Bubble	0.003461	0.020323	1.0849
+Insert	0.001172	0.012713	0.312234
+
+The 'statistics results' (number of get, set, length calls) are not summarized in the table because they were used more sparsely in my analysis. The time taken to solve the sorting algorith led me to a lot of my conclusion. 
+
+First of all is clear that it matters what kind of data is being sorted. Especially for the BubbleSort algorithm. This is the case, because if the data is already sorted, the effort that the algorithm is going to put into sorting is going to be much more minimal (evidenced by the total number of get,set,length method calls). This of course minimizes the time that the algorithm spends processing the data. Therefore this is the best case scenario for any sorting algorithm. This is specially good for BubbleSort because it is designed to stop as soon as it iterates one time without swapping anything. This is supported by looking at the data and seeing that the total number method calls for BubbleSort is significantly smaller when sorting sorted.data than those of InsertionSort and SelectionSort. 
+
+From the time progression in all the algorithms, it is obvious that the expected time complexity based on the size of the array to be sorted is indeed n^2 for all three algorithms. This is seen by the fact that the time taken for all three algorithms in the Reverse. This is the case because having to sort an Array of items that has the items 'sorted' in the exact opposite of the sorting we want to perform is the worst case scenario. Plotting the times in excel against the number of items to be sorted gave each of the algorithms a quadratic relationship, that is n^2 n = number of items to be sorted. 
+
+Now I am going to discuss the strengths and weaknesses of each algorithm based on the time that the algorithms output for the three data sets. 
+
+It seems that bubble sort is a great algorithm for short and mostly ordered lists. This makes sense because if we have an almost ordered list, then a couple swaps should order the list, and after no swaps are executed the algorithm ends. However, this benefit present due to its swapping ability, becomes its pitfall when ordering larger and larger lists that are very disorganized, because it compares every element to one another. Therefore, this makes its cost in an average case scenario scale very similarly to that of the worse case scenario (evidenced by comaparing time, and total calls for the reverse.data and random.data datasets). 
+
+Now, based on the worst case scenario (reverse.data), it seems that SelectionSort and InsertionSort perform very similar to each other, and better than bubble, specially as the size of the array to sort scales up. Therefore, to tease apart the benefit of SelectionSort over InsertionSort I looked at the data from 'average cases' (random.data). It seems that on average, SelectionSort is quicker than Insertion sort. 
+
+To figure out why, lets think a little about how both of these algorithms sort the data given to them. In selection sort, the inner loop looks at the 'unsorted elements'. Each iteration selects one element, and moves it to its final location, therefore performing only one set operation on the array. In insertion sort, each iteration of the inner loop iterates over the 'sorted elements'. Sorted elements are displaced until the loop finds the correct place to insert the next unsorted element. Therefore calling the set function k (number of sorted elements at that time) times making it rather slower than Selection sort. This is backed up by the fact that for instance when sorting from random.data 10000 items, SelectionSort called set 19,982 times, while InsertionSort called it 24,979,564. 
+
+Problem 3
+1    public static void selectionSort(int[] a) {
+2        for (int i = 0; 				//A:1   C:0
+				  i < a.length-1; 		//A:0   C:n
+				  i++) {				//A:n-1 C:0
+3            int min = i;				//A:n-1 C:0
+4            for (int j = i+1; 			//A:n-1 C:0
+					  j < a.length;     //A:0   C:1/2(n-1)(n+2)
+					  j++) {            //A:1/2(n-1)n C:0
+5                if (a[j] < a[min]) {   //A:0   C:1/2(n-1)n
+6                    min = j;           //A:1/2(n-1)n C:0
+7                }
+8            }
+9            int t = a[i]; 				//A:n-1 C:0
+				a[i] = a[min]; 			//A:n-1 C:0
+				a[min] = t;				//A:n-1 C:0
+10        }
+11    }
+
+I am going to explain how to arrive at the polynomials for C(n), and A(n) in the worst case scenario for the selection sort method above. In the worst case, the numbers inside the array are reverse sorted that is array = {3,2,1}.
+
+If that is the case:
+We ignore the cost of calling the actual method in line 1.
+In the for loop in line 2, we call the int i = 0 assignment one time, no comparisons made. The comparison i < a.length-1 will be ran n times for instance for an array of length 2, it would compare two times 0 < 1, and 1 < 1; no assignments are made. The increment i++ is going to happen n-1 times; for the same example as above, it will happen 1 time, from 0 to 1. 
+
+The assignment in line 3 will be ran as many times as the code in the loop is ran, which is n-1 times based on the i++ increment count, no comparisons happen. 
+
+In the for loop in line 4, we call the int j = i+1 as many times as the outer loop executes, that is n-1 times. j < a.length is a little tricky. the comparison is ran n-i times and the loop is ran n-1 times. This mean that the comparison is run for the sum of n-i where i goes from 0 to n-2, which is 1/2(n-1)(n+2). The assignment j++ is similarly ran n-i-1 times for n-1 times; that is the summation of n-i-1 for i from 0 to n-2, which is 1/2(n-1)n.
+
+In line 5 the comparison will be ran n-i-1 times for n-1. Like the assignment j++ in line 4 this comes to be 1/2(n-1)n. For line 6 because we are assuming the worst case the if in line 5 will always be true and thus the assignment in line 6 needs to happen 1/2(n-1)n times too. 
+
+Lastly, for the worst case scenario, all assignments in line 9 will be ran as many times as the outer loop runs, that is n-1 times. 
+
+Summing up-->
+A(n)= 	1 + (n-1) + (n-1) + (n-1) + 1/2(n-1)n + 1/2(n-1)n + (n-1) + (n-1) + (n-1)
+	=	1 + 6(n-1) + 2(1/2(n-1)n) 
+	=   1 + 6n - 6 + n^2 - n
+	=   n^2 + 5n - 5
+
+C(n)=   n + 1/2(n-1)(n+2) + 1/2(n-1)n
+	=	2n/2 + 1/2(n^2 + n - 2) + 1/2(n^2 - n)
+	=   1/2(2n^2 + 2n - 2)
+	=   n^2 + n - 1
+
+
+DATA FOR PROBLEM 2
+Sorting 100 items from sorted.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 4.0E-6 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 15049
+get():9900
+set():0
+length():5149
+Took 0.007163 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 199
+get():198
+set():0
+length():1
+Took 1.12E-4 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 298
+get():198
+set():0
+length():100
+Took 1.183E-4 seconds.
+----------------------------------------
+Sorting successful.
+
+Sorting 1000 items from sorted.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 3.0E-6 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 1500499
+get():999000
+set():0
+length():501499
+Took 0.00561 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 1999
+get():1998
+set():0
+length():1
+Took 4.14E-4 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 2998
+get():1998
+set():0
+length():1000
+Took 2.2E-3 seconds.
+----------------------------------------
+Sorting successful.
+
+Sorting 10000 items from sorted.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 6.0E-6 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 150004999
+get():99990000
+set():0
+length():50014999
+Took 0.357992 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 19999
+get():19998
+set():0
+length():1
+Took 0.001583 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 29998
+get():19998
+set():0
+length():10000
+Took 0.002231 seconds.
+----------------------------------------
+Sorting successful.
+
+
+Sorting 100 items from reverse.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 4.0E-6 seconds.
+----------------------------------------
+Sorting FAILED!!!
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 15249
+get():10000
+set():100
+length():5149
+Took 0.004829 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 29701
+get():19800
+set():9900
+length():1
+Took 0.002936 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 15148
+get():9999
+set():5049
+length():100
+Took 0.001229 seconds.
+----------------------------------------
+Sorting successful.
+
+Sorting 1000 items from reverse.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 6.0E-6 seconds.
+----------------------------------------
+Sorting FAILED!!!
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 1502499
+get():1000000
+set():1000
+length():501499
+Took 0.018611 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 2997001
+get():1998000
+set():999000
+length():1
+Took 0.021273 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 1501498
+get():999999
+set():500499
+length():1000
+Took 0.015675 seconds.
+----------------------------------------
+Sorting successful.
+
+Sorting 10000 items from reverse.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 4.0E-6 seconds.
+----------------------------------------
+Sorting FAILED!!!
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 150024999
+get():100000000
+set():10000
+length():50014999
+Took 0.447358 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 299970001
+get():199980000
+set():99990000
+length():1
+Took 0.645561 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 150014998
+get():99999999
+set():50004999
+length():10000
+Took 0.472053 seconds.
+----------------------------------------
+Sorting successful.
+
+Sorting 100 items from random.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 3.0E-6 seconds.
+----------------------------------------
+Sorting FAILED!!!
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 15421
+get():10086
+set():186
+length():5149
+Took 0.004138 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 18055
+get():13652
+set():4402
+length():1
+Took 0.003461 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 6993
+get():4598
+set():2295
+length():100
+Took 0.001172 seconds.
+----------------------------------------
+Sorting successful.
+
+Sorting 1000 items from random.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 5.0E-6 seconds.
+----------------------------------------
+Sorting FAILED!!!
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 1504467
+get():1000984
+set():1984
+length():501499
+Took 0.01952 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 1996175
+get():1496102
+set():500072
+length():1
+Took 0.020323 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 754098
+get():502068
+set():251030
+length():1000
+Took 0.012713 seconds.
+----------------------------------------
+Sorting successful.
+
+Sorting 10000 items from random.data
+========================================
+Null Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 0
+get():0
+set():0
+length():0
+Took 6.0E-6 seconds.
+----------------------------------------
+Sorting FAILED!!!
+========================================
+Selection Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 150044963
+get():100009982
+set():19982
+length():50014999
+Took 0.447367 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Bubble Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 199852045
+get():149912894
+set():49939150
+length():1
+Took 1.084945 seconds.
+----------------------------------------
+Sorting successful.
+========================================
+Insertion Sort
+----------------------------------------
+StatableArray Statistics
+========================
+Total: 74948710
+get():49959146
+set():24979564
+length():10000
+Took 0.312234 seconds.
+----------------------------------------
+Sorting successful.

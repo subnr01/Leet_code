@@ -1,0 +1,240 @@
+JAVA PROFILE 1.0.1, created Tue Mar 25 21:11:25 2014
+
+Copyright (c) 2003, 2005, Oracle and/or its affiliates. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+  - Neither the name of Oracle nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Header for -agentlib:hprof (or -Xrunhprof) ASCII Output (JDK 5.0 JVMTI based)
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME        is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+                the time spent by a thread waiting to enter a monitor.
+                Entries in this record are TRACEs ranked by the percentage
+                of total monitor contention time and a brief description
+                of the monitor.  The "count" field indicates the number of 
+                times the monitor was contended at that TRACE.
+
+MONITOR DUMP    is a complete snapshot of all the monitors and threads in 
+                the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=50000170, id = 200001, name="main", group="main")
+THREAD END (id = 200001)
+THREAD START (obj=50000170, id = 200004, name="DestroyJavaVM", group="main")
+THREAD END (id = 200004)
+TRACE 300166:
+	ListSet.has(ListSet.java:83)
+	ListSet.insert(ListSet.java:40)
+	ListSetUnique.main(ListSetUnique.java:30)
+TRACE 300163:
+	java.util.regex.Matcher.lookingAt(Matcher.java:636)
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:953)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+TRACE 300172:
+	java.io.FileOutputStream.writeBytes(FileOutputStream.java:Unknown line)
+	java.io.FileOutputStream.write(FileOutputStream.java:345)
+	java.io.BufferedOutputStream.flushBuffer(BufferedOutputStream.java:82)
+	java.io.BufferedOutputStream.flush(BufferedOutputStream.java:140)
+TRACE 300158:
+	java.util.Arrays.copyOfRange(Arrays.java:2694)
+	java.lang.String.<init>(String.java:203)
+	java.nio.HeapCharBuffer.toString(HeapCharBuffer.java:561)
+	java.nio.CharBuffer.toString(CharBuffer.java:1201)
+TRACE 300159:
+	java.util.regex.Matcher.group(Matcher.java:445)
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:1009)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+TRACE 300160:
+	sun.nio.cs.StreamDecoder.read(StreamDecoder.java:177)
+	java.io.InputStreamReader.read(InputStreamReader.java:184)
+	java.io.Reader.read(Reader.java:100)
+	java.util.Scanner.readInput(Scanner.java:849)
+TRACE 300161:
+	java.lang.String.<init>(String.java:203)
+	java.nio.HeapCharBuffer.toString(HeapCharBuffer.java:561)
+	java.nio.CharBuffer.toString(CharBuffer.java:1201)
+	java.util.regex.Matcher.group(Matcher.java:490)
+TRACE 300162:
+	java.util.Scanner.hasNextInt(Scanner.java:2064)
+	java.util.Scanner.hasNextInt(Scanner.java:2050)
+	ListSetUnique.main(ListSetUnique.java:28)
+TRACE 300164:
+	java.nio.HeapCharBuffer.subSequence(HeapCharBuffer.java:42)
+	java.util.regex.Matcher.getSubSequence(Matcher.java:1245)
+	java.util.regex.Matcher.group(Matcher.java:490)
+	java.util.regex.Matcher.group(Matcher.java:445)
+TRACE 300165:
+	java.util.regex.Matcher.hitEnd(Matcher.java:1156)
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:956)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+TRACE 300167:
+	java.util.regex.Pattern$Curly.match0(Pattern.java:4142)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4132)
+	java.util.regex.Matcher.match(Matcher.java:1221)
+	java.util.regex.Matcher.lookingAt(Matcher.java:636)
+TRACE 300168:
+	java.util.Scanner.setRadix(Scanner.java:1310)
+	java.util.Scanner.hasNextInt(Scanner.java:2064)
+	java.util.Scanner.hasNextInt(Scanner.java:2050)
+	ListSetUnique.main(ListSetUnique.java:28)
+TRACE 300169:
+	java.util.regex.Pattern$Ques.match(Pattern.java:4079)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+	java.util.regex.Pattern$Branch.match(Pattern.java:4502)
+TRACE 300170:
+	ListSet.find(ListSet.java:52)
+	ListSet.has(ListSet.java:83)
+	ListSet.insert(ListSet.java:40)
+	ListSetUnique.main(ListSetUnique.java:30)
+TRACE 300171:
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:952)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+	java.util.Scanner.hasNextInt(Scanner.java:2050)
+TRACE 300173:
+	java.io.BufferedWriter.min(BufferedWriter.java:153)
+	java.io.BufferedWriter.write(BufferedWriter.java:225)
+	java.io.Writer.write(Writer.java:157)
+	java.io.PrintStream.write(PrintStream.java:525)
+TRACE 300033:
+	java.lang.Object.<init>(Object.java:37)
+	java.util.zip.ZipFile.<init>(ZipFile.java:197)
+	java.util.zip.ZipFile.<init>(ZipFile.java:145)
+	java.util.jar.JarFile.<init>(JarFile.java:153)
+TRACE 300112:
+	sun.misc.URLClassPath.getResources(URLClassPath.java:263)
+	sun.misc.URLClassPath.getResources(URLClassPath.java:298)
+	java.lang.ClassLoader.getBootstrapResources(ClassLoader.java:1315)
+	java.lang.ClassLoader.getResources(ClassLoader.java:1183)
+TRACE 300140:
+	java.lang.String.indexOf(String.java:1739)
+	java.lang.String.indexOf(String.java:1698)
+	java.lang.String.indexOf(String.java:1678)
+	sun.util.resources.LocaleData$LocaleDataResourceBundleControl.getCandidateLocales(LocaleData.java:195)
+TRACE 300050:
+	java.security.BasicPermission.newPermissionCollection(BasicPermission.java:260)
+	java.security.Permissions.getPermissionCollection(Permissions.java:255)
+	java.security.Permissions.add(Permissions.java:133)
+	sun.misc.Launcher$AppClassLoader.getPermissions(Launcher.java:317)
+TRACE 300155:
+	java.util.regex.Matcher.match(Matcher.java:1213)
+	java.util.regex.Matcher.matches(Matcher.java:559)
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:1008)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+TRACE 300154:
+	java.nio.CharBuffer.charAt(CharBuffer.java:1238)
+	java.lang.Character.codePointAt(Character.java:4668)
+	java.util.regex.Pattern$CharProperty.match(Pattern.java:3693)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4125)
+TRACE 300156:
+	java.util.regex.Pattern$LastNode.match(Pattern.java:3381)
+	java.util.regex.Pattern$Curly.match0(Pattern.java:4177)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4132)
+	java.util.regex.Matcher.match(Matcher.java:1221)
+TRACE 300157:
+	java.nio.HeapCharBuffer.ix(HeapCharBuffer.java:131)
+	java.nio.HeapCharBuffer.get(HeapCharBuffer.java:139)
+	java.nio.CharBuffer.charAt(CharBuffer.java:1238)
+	java.util.regex.Pattern$BmpCharProperty.match(Pattern.java:3715)
+CPU SAMPLES BEGIN (total = 28) Tue Mar 25 21:11:26 2014
+rank   self  accum   count trace method
+   1 10.71% 10.71%       3 300166 ListSet.has
+   2  7.14% 17.86%       2 300163 java.util.regex.Matcher.lookingAt
+   3  7.14% 25.00%       2 300172 java.io.FileOutputStream.writeBytes
+   4  3.57% 28.57%       1 300158 java.util.Arrays.copyOfRange
+   5  3.57% 32.14%       1 300159 java.util.regex.Matcher.group
+   6  3.57% 35.71%       1 300160 sun.nio.cs.StreamDecoder.read
+   7  3.57% 39.29%       1 300161 java.lang.String.<init>
+   8  3.57% 42.86%       1 300162 java.util.Scanner.hasNextInt
+   9  3.57% 46.43%       1 300164 java.nio.HeapCharBuffer.subSequence
+  10  3.57% 50.00%       1 300165 java.util.regex.Matcher.hitEnd
+  11  3.57% 53.57%       1 300167 java.util.regex.Pattern$Curly.match0
+  12  3.57% 57.14%       1 300168 java.util.Scanner.setRadix
+  13  3.57% 60.71%       1 300169 java.util.regex.Pattern$Ques.match
+  14  3.57% 64.29%       1 300170 ListSet.find
+  15  3.57% 67.86%       1 300171 java.util.Scanner.getCompleteTokenInBuffer
+  16  3.57% 71.43%       1 300173 java.io.BufferedWriter.min
+  17  3.57% 75.00%       1 300033 java.lang.Object.<init>
+  18  3.57% 78.57%       1 300112 sun.misc.URLClassPath.getResources
+  19  3.57% 82.14%       1 300140 java.lang.String.indexOf
+  20  3.57% 85.71%       1 300050 java.security.BasicPermission.newPermissionCollection
+  21  3.57% 89.29%       1 300155 java.util.regex.Matcher.match
+  22  3.57% 92.86%       1 300154 java.nio.CharBuffer.charAt
+  23  3.57% 96.43%       1 300156 java.util.regex.Pattern$LastNode.match
+  24  3.57% 100.00%       1 300157 java.nio.HeapCharBuffer.ix
+CPU SAMPLES END

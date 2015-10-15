@@ -1,0 +1,311 @@
+JAVA PROFILE 1.0.1, created Tue Mar 25 21:15:04 2014
+
+Copyright (c) 2003, 2005, Oracle and/or its affiliates. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+  - Neither the name of Oracle nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Header for -agentlib:hprof (or -Xrunhprof) ASCII Output (JDK 5.0 JVMTI based)
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME        is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+                the time spent by a thread waiting to enter a monitor.
+                Entries in this record are TRACEs ranked by the percentage
+                of total monitor contention time and a brief description
+                of the monitor.  The "count" field indicates the number of 
+                times the monitor was contended at that TRACE.
+
+MONITOR DUMP    is a complete snapshot of all the monitors and threads in 
+                the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=50000170, id = 200001, name="main", group="main")
+THREAD END (id = 200001)
+THREAD START (obj=50000170, id = 200004, name="DestroyJavaVM", group="main")
+THREAD END (id = 200004)
+THREAD END (id = 200002)
+TRACE 300176:
+	java.io.FileOutputStream.writeBytes(FileOutputStream.java:Unknown line)
+	java.io.FileOutputStream.write(FileOutputStream.java:345)
+	java.io.BufferedOutputStream.flushBuffer(BufferedOutputStream.java:82)
+	java.io.BufferedOutputStream.flush(BufferedOutputStream.java:140)
+TRACE 300171:
+	java.lang.System.arraycopy(System.java:Unknown line)
+	java.lang.String.getChars(String.java:826)
+	java.io.BufferedWriter.write(BufferedWriter.java:226)
+	java.io.Writer.write(Writer.java:157)
+TRACE 300159:
+	java.util.Arrays.copyOfRange(Arrays.java:2694)
+	java.lang.String.<init>(String.java:203)
+	java.nio.HeapCharBuffer.toString(HeapCharBuffer.java:561)
+	java.nio.CharBuffer.toString(CharBuffer.java:1201)
+TRACE 300160:
+	java.util.regex.Pattern$Branch.match(Pattern.java:4502)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+	java.util.regex.Pattern$Curly.match2(Pattern.java:4203)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4136)
+TRACE 300161:
+	java.util.regex.Pattern$BmpCharProperty.match(Pattern.java:3715)
+	java.util.regex.Pattern$Branch.match(Pattern.java:4502)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+	java.util.regex.Pattern$Curly.match2(Pattern.java:4203)
+TRACE 300162:
+	java.util.Scanner.nextInt(Scanner.java:2119)
+	BinaryHeapUnique.main(BinaryHeapUnique.java:29)
+TRACE 300163:
+	java.util.Scanner.ensureOpen(Scanner.java:1114)
+	java.util.Scanner.hasNext(Scanner.java:1478)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+	java.util.Scanner.hasNextInt(Scanner.java:2050)
+TRACE 300164:
+	BinaryHeapPriorityQueue.insert(BinaryHeapPriorityQueue.java:139)
+	BinaryHeapUnique.main(BinaryHeapUnique.java:30)
+TRACE 300165:
+	java.util.regex.Matcher.group(Matcher.java:445)
+	java.util.Scanner.cacheResult(Scanner.java:803)
+	java.util.Scanner.hasNext(Scanner.java:1487)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+TRACE 300166:
+	java.util.regex.Pattern$Ques.match(Pattern.java:4079)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+	java.util.regex.Pattern$Branch.match(Pattern.java:4502)
+TRACE 300167:
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:947)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+	java.util.Scanner.hasNextInt(Scanner.java:2050)
+TRACE 300168:
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:951)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+	java.util.Scanner.hasNextInt(Scanner.java:2050)
+TRACE 300169:
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:981)
+	java.util.Scanner.hasNext(Scanner.java:1485)
+	java.util.Scanner.hasNextInt(Scanner.java:2065)
+	java.util.Scanner.hasNextInt(Scanner.java:2050)
+TRACE 300170:
+	sun.nio.cs.StreamEncoder.write(StreamEncoder.java:117)
+	java.io.OutputStreamWriter.write(OutputStreamWriter.java:207)
+	java.io.BufferedWriter.flushBuffer(BufferedWriter.java:129)
+	java.io.PrintStream.write(PrintStream.java:526)
+TRACE 300172:
+	sun.nio.cs.UTF_8$Encoder.encodeArrayLoop(UTF_8.java:515)
+	sun.nio.cs.UTF_8$Encoder.encodeLoop(UTF_8.java:619)
+	java.nio.charset.CharsetEncoder.encode(CharsetEncoder.java:561)
+	sun.nio.cs.StreamEncoder.implWrite(StreamEncoder.java:271)
+TRACE 300173:
+	BinaryHeapPriorityQueue.swap(BinaryHeapPriorityQueue.java:85)
+	BinaryHeapPriorityQueue.sink(BinaryHeapPriorityQueue.java:118)
+	BinaryHeapPriorityQueue.remove(BinaryHeapPriorityQueue.java:171)
+	BinaryHeapUnique.main(BinaryHeapUnique.java:35)
+TRACE 300174:
+	BinaryHeapPriorityQueue.sink(BinaryHeapPriorityQueue.java:112)
+	BinaryHeapPriorityQueue.remove(BinaryHeapPriorityQueue.java:171)
+	BinaryHeapUnique.main(BinaryHeapUnique.java:35)
+TRACE 300175:
+	java.io.OutputStreamWriter.write(OutputStreamWriter.java:207)
+	java.io.BufferedWriter.flushBuffer(BufferedWriter.java:129)
+	java.io.PrintStream.newLine(PrintStream.java:545)
+	java.io.PrintStream.println(PrintStream.java:824)
+TRACE 300177:
+	java.lang.String.getChars(String.java:823)
+	java.io.BufferedWriter.write(BufferedWriter.java:226)
+	java.io.Writer.write(Writer.java:157)
+	java.io.BufferedWriter.newLine(BufferedWriter.java:243)
+TRACE 300178:
+	java.nio.Buffer.flip(Buffer.java:349)
+	sun.nio.cs.StreamEncoder.writeBytes(StreamEncoder.java:210)
+	sun.nio.cs.StreamEncoder.implFlushBuffer(StreamEncoder.java:291)
+	sun.nio.cs.StreamEncoder.flushBuffer(StreamEncoder.java:104)
+TRACE 300179:
+	sun.nio.cs.StreamEncoder.write(StreamEncoder.java:119)
+	java.io.OutputStreamWriter.write(OutputStreamWriter.java:207)
+	java.io.BufferedWriter.flushBuffer(BufferedWriter.java:129)
+	java.io.PrintStream.write(PrintStream.java:526)
+TRACE 300180:
+	java.lang.System.arraycopy(System.java:Unknown line)
+	java.io.BufferedOutputStream.write(BufferedOutputStream.java:128)
+	java.io.PrintStream.write(PrintStream.java:480)
+	sun.nio.cs.StreamEncoder.writeBytes(StreamEncoder.java:221)
+TRACE 300181:
+	java.io.Writer.write(Writer.java:157)
+	java.io.BufferedWriter.newLine(BufferedWriter.java:243)
+	java.io.PrintStream.newLine(PrintStream.java:544)
+	java.io.PrintStream.println(PrintStream.java:824)
+TRACE 300182:
+	java.nio.HeapCharBuffer.<init>(HeapCharBuffer.java:70)
+	java.nio.CharBuffer.wrap(CharBuffer.java:369)
+	sun.nio.cs.StreamEncoder.implWrite(StreamEncoder.java:265)
+	sun.nio.cs.StreamEncoder.write(StreamEncoder.java:125)
+TRACE 300183:
+	sun.nio.cs.StreamEncoder.implWrite(StreamEncoder.java:274)
+	sun.nio.cs.StreamEncoder.write(StreamEncoder.java:125)
+	java.io.OutputStreamWriter.write(OutputStreamWriter.java:207)
+	java.io.BufferedWriter.flushBuffer(BufferedWriter.java:129)
+TRACE 300184:
+	sun.nio.cs.StreamEncoder.writeBytes(StreamEncoder.java:214)
+	sun.nio.cs.StreamEncoder.implFlushBuffer(StreamEncoder.java:291)
+	sun.nio.cs.StreamEncoder.flushBuffer(StreamEncoder.java:104)
+	java.io.OutputStreamWriter.flushBuffer(OutputStreamWriter.java:185)
+TRACE 300185:
+	java.lang.Integer.toString(Integer.java:331)
+	java.lang.Integer.toString(Integer.java:739)
+	java.lang.String.valueOf(String.java:2854)
+	java.io.PrintStream.println(PrintStream.java:821)
+TRACE 300186:
+	BinaryHeapPriorityQueue.remove(BinaryHeapPriorityQueue.java:159)
+	BinaryHeapUnique.main(BinaryHeapUnique.java:35)
+TRACE 300187:
+	java.io.PrintStream.newLine(PrintStream.java:548)
+	java.io.PrintStream.println(PrintStream.java:824)
+	BinaryHeapUnique.main(BinaryHeapUnique.java:34)
+TRACE 300041:
+	sun.nio.cs.UTF_8$Encoder.encode(UTF_8.java:632)
+	java.lang.StringCoding$StringEncoder.encode(StringCoding.java:304)
+	java.lang.StringCoding.encode(StringCoding.java:344)
+	java.lang.String.getBytes(String.java:916)
+TRACE 300054:
+	java.lang.ClassLoader.findBootstrapClass(ClassLoader.java:Unknown line)
+	java.lang.ClassLoader.findBootstrapClassOrNull(ClassLoader.java:1070)
+	java.lang.ClassLoader.loadClass(ClassLoader.java:414)
+	java.lang.ClassLoader.loadClass(ClassLoader.java:412)
+TRACE 300033:
+	java.nio.ByteBuffer.hasArray(ByteBuffer.java:935)
+	sun.nio.cs.UTF_8$Decoder.decodeLoop(UTF_8.java:353)
+	java.nio.charset.CharsetDecoder.decode(CharsetDecoder.java:561)
+	sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:317)
+TRACE 300098:
+	java.util.Locale$1.<clinit>(Locale.java:766)
+	java.util.Locale.getDefault(Locale.java:766)
+	java.util.Scanner.<init>(Scanner.java:585)
+	java.util.Scanner.<init>(Scanner.java:608)
+TRACE 300156:
+	BinaryHeapPriorityQueue.insert(BinaryHeapPriorityQueue.java:143)
+	BinaryHeapUnique.main(BinaryHeapUnique.java:30)
+TRACE 300155:
+	java.util.regex.Pattern$LastNode.match(Pattern.java:3378)
+	java.util.regex.Pattern$Curly.match0(Pattern.java:4177)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4132)
+	java.util.regex.Pattern$Start.match(Pattern.java:3408)
+TRACE 300157:
+	java.nio.CharBuffer.charAt(CharBuffer.java:1238)
+	java.lang.Character.codePointAt(Character.java:4668)
+	java.util.regex.Pattern$CharProperty.match(Pattern.java:3693)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4125)
+TRACE 300158:
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4554)
+	java.util.regex.Pattern$Branch.match(Pattern.java:4502)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+	java.util.regex.Pattern$GroupHead.match(Pattern.java:4556)
+CPU SAMPLES BEGIN (total = 43) Tue Mar 25 21:15:04 2014
+rank   self  accum   count trace method
+   1 11.63% 11.63%       5 300176 java.io.FileOutputStream.writeBytes
+   2  4.65% 16.28%       2 300171 java.lang.System.arraycopy
+   3  4.65% 20.93%       2 300159 java.util.Arrays.copyOfRange
+   4  2.33% 23.26%       1 300160 java.util.regex.Pattern$Branch.match
+   5  2.33% 25.58%       1 300161 java.util.regex.Pattern$BmpCharProperty.match
+   6  2.33% 27.91%       1 300162 java.util.Scanner.nextInt
+   7  2.33% 30.23%       1 300163 java.util.Scanner.ensureOpen
+   8  2.33% 32.56%       1 300164 BinaryHeapPriorityQueue.insert
+   9  2.33% 34.88%       1 300165 java.util.regex.Matcher.group
+  10  2.33% 37.21%       1 300166 java.util.regex.Pattern$Ques.match
+  11  2.33% 39.53%       1 300167 java.util.Scanner.getCompleteTokenInBuffer
+  12  2.33% 41.86%       1 300168 java.util.Scanner.getCompleteTokenInBuffer
+  13  2.33% 44.19%       1 300169 java.util.Scanner.getCompleteTokenInBuffer
+  14  2.33% 46.51%       1 300170 sun.nio.cs.StreamEncoder.write
+  15  2.33% 48.84%       1 300172 sun.nio.cs.UTF_8$Encoder.encodeArrayLoop
+  16  2.33% 51.16%       1 300173 BinaryHeapPriorityQueue.swap
+  17  2.33% 53.49%       1 300174 BinaryHeapPriorityQueue.sink
+  18  2.33% 55.81%       1 300175 java.io.OutputStreamWriter.write
+  19  2.33% 58.14%       1 300177 java.lang.String.getChars
+  20  2.33% 60.47%       1 300178 java.nio.Buffer.flip
+  21  2.33% 62.79%       1 300179 sun.nio.cs.StreamEncoder.write
+  22  2.33% 65.12%       1 300180 java.lang.System.arraycopy
+  23  2.33% 67.44%       1 300181 java.io.Writer.write
+  24  2.33% 69.77%       1 300182 java.nio.HeapCharBuffer.<init>
+  25  2.33% 72.09%       1 300183 sun.nio.cs.StreamEncoder.implWrite
+  26  2.33% 74.42%       1 300184 sun.nio.cs.StreamEncoder.writeBytes
+  27  2.33% 76.74%       1 300185 java.lang.Integer.toString
+  28  2.33% 79.07%       1 300186 BinaryHeapPriorityQueue.remove
+  29  2.33% 81.40%       1 300187 java.io.PrintStream.newLine
+  30  2.33% 83.72%       1 300041 sun.nio.cs.UTF_8$Encoder.encode
+  31  2.33% 86.05%       1 300054 java.lang.ClassLoader.findBootstrapClass
+  32  2.33% 88.37%       1 300033 java.nio.ByteBuffer.hasArray
+  33  2.33% 90.70%       1 300098 java.util.Locale$1.<clinit>
+  34  2.33% 93.02%       1 300156 BinaryHeapPriorityQueue.insert
+  35  2.33% 95.35%       1 300155 java.util.regex.Pattern$LastNode.match
+  36  2.33% 97.67%       1 300157 java.nio.CharBuffer.charAt
+  37  2.33% 100.00%       1 300158 java.util.regex.Pattern$GroupHead.match
+CPU SAMPLES END

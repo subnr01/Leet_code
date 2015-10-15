@@ -1,0 +1,175 @@
+JAVA PROFILE 1.0.1, created Tue Mar 25 21:09:44 2014
+
+Copyright (c) 2003, 2005, Oracle and/or its affiliates. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+  - Neither the name of Oracle nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Header for -agentlib:hprof (or -Xrunhprof) ASCII Output (JDK 5.0 JVMTI based)
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME        is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+                the time spent by a thread waiting to enter a monitor.
+                Entries in this record are TRACEs ranked by the percentage
+                of total monitor contention time and a brief description
+                of the monitor.  The "count" field indicates the number of 
+                times the monitor was contended at that TRACE.
+
+MONITOR DUMP    is a complete snapshot of all the monitors and threads in 
+                the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=50000170, id = 200001, name="main", group="main")
+THREAD END (id = 200001)
+THREAD START (obj=50000170, id = 200004, name="DestroyJavaVM", group="main")
+THREAD END (id = 200004)
+TRACE 300107:
+	java.util.ServiceLoader.loadInstalled(ServiceLoader.java:531)
+	sun.util.LocaleServiceProviderPool$1.run(LocaleServiceProviderPool.java:131)
+	java.security.AccessController.doPrivileged(AccessController.java:Unknown line)
+	sun.util.LocaleServiceProviderPool.<init>(LocaleServiceProviderPool.java:129)
+TRACE 300156:
+	java.lang.CharacterDataLatin1.getProperties(CharacterDataLatin1.java:71)
+	java.lang.CharacterDataLatin1.isWhitespace(CharacterDataLatin1.java:202)
+	java.lang.Character.isWhitespace(Character.java:6599)
+	java.util.regex.Pattern$CharPropertyNames$21.isSatisfiedBy(Pattern.java:5639)
+TRACE 300157:
+	java.nio.Buffer.checkIndex(Buffer.java:531)
+	java.nio.HeapCharBuffer.get(HeapCharBuffer.java:139)
+	java.nio.CharBuffer.charAt(CharBuffer.java:1238)
+	java.lang.Character.codePointAt(Character.java:4668)
+TRACE 300158:
+	java.util.ArrayList.contains(ArrayList.java:281)
+	ArrayListSet.insert(ArrayListSet.java:39)
+	ArrayListSetUnique.main(ArrayListSetUnique.java:30)
+TRACE 300159:
+	java.nio.CharBuffer.toString(CharBuffer.java:1201)
+	java.util.regex.Matcher.group(Matcher.java:490)
+	java.util.regex.Matcher.group(Matcher.java:445)
+	java.util.Scanner.getCompleteTokenInBuffer(Scanner.java:1009)
+TRACE 300160:
+	java.util.regex.Pattern$Curly.match0(Pattern.java:4177)
+	java.util.regex.Pattern$Curly.match(Pattern.java:4132)
+	java.util.regex.Matcher.match(Matcher.java:1221)
+	java.util.regex.Matcher.lookingAt(Matcher.java:636)
+TRACE 300161:
+	java.lang.System.arraycopy(System.java:Unknown line)
+	java.lang.String.getChars(String.java:826)
+	java.io.BufferedWriter.write(BufferedWriter.java:226)
+	java.io.Writer.write(Writer.java:157)
+TRACE 300162:
+	java.lang.System.arraycopy(System.java:Unknown line)
+	java.io.BufferedOutputStream.write(BufferedOutputStream.java:128)
+	java.io.PrintStream.write(PrintStream.java:480)
+	sun.nio.cs.StreamEncoder.writeBytes(StreamEncoder.java:221)
+TRACE 300140:
+	java.io.FileInputStream.open(FileInputStream.java:Unknown line)
+	java.io.FileInputStream.<init>(FileInputStream.java:146)
+	java.io.FileInputStream.<init>(FileInputStream.java:101)
+	java.util.Currency$1.run(Currency.java:198)
+TRACE 300029:
+	sun.misc.JarIndex.addToList(JarIndex.java:156)
+	sun.misc.JarIndex.read(JarIndex.java:326)
+	sun.misc.JarIndex.<init>(JarIndex.java:92)
+	sun.misc.JarIndex.getJarIndex(JarIndex.java:137)
+TRACE 300051:
+	java.lang.StringCoding$StringEncoder.encode(StringCoding.java:300)
+	java.lang.StringCoding.encode(StringCoding.java:344)
+	java.lang.String.getBytes(String.java:916)
+	java.io.UnixFileSystem.getLength(UnixFileSystem.java:Unknown line)
+TRACE 300033:
+	java.util.zip.ZipFile.open(ZipFile.java:Unknown line)
+	java.util.zip.ZipFile.<init>(ZipFile.java:215)
+	java.util.zip.ZipFile.<init>(ZipFile.java:145)
+	java.util.jar.JarFile.<init>(JarFile.java:153)
+TRACE 300155:
+	java.nio.Buffer.remaining(Buffer.java:383)
+	java.nio.CharBuffer.length(CharBuffer.java:1220)
+	java.util.regex.Matcher.getTextLength(Matcher.java:1234)
+	java.util.regex.Matcher.region(Matcher.java:988)
+CPU SAMPLES BEGIN (total = 13) Tue Mar 25 21:09:44 2014
+rank   self  accum   count trace method
+   1  7.69%  7.69%       1 300107 java.util.ServiceLoader.loadInstalled
+   2  7.69% 15.38%       1 300156 java.lang.CharacterDataLatin1.getProperties
+   3  7.69% 23.08%       1 300157 java.nio.Buffer.checkIndex
+   4  7.69% 30.77%       1 300158 java.util.ArrayList.contains
+   5  7.69% 38.46%       1 300159 java.nio.CharBuffer.toString
+   6  7.69% 46.15%       1 300160 java.util.regex.Pattern$Curly.match0
+   7  7.69% 53.85%       1 300161 java.lang.System.arraycopy
+   8  7.69% 61.54%       1 300162 java.lang.System.arraycopy
+   9  7.69% 69.23%       1 300140 java.io.FileInputStream.open
+  10  7.69% 76.92%       1 300029 sun.misc.JarIndex.addToList
+  11  7.69% 84.62%       1 300051 java.lang.StringCoding$StringEncoder.encode
+  12  7.69% 92.31%       1 300033 java.util.zip.ZipFile.open
+  13  7.69% 100.00%       1 300155 java.nio.Buffer.remaining
+CPU SAMPLES END

@@ -1,0 +1,831 @@
+Jose Nino Rivera jnino1@jhu.edu
+Tiffany Chung tchung12@jhu.edu
+600.226 Data Structures
+Assignment 6: Setting Priorities
+3/26/14
+
+Below we are going to discuss our implementations and the trends and explanations 
+behind the way they perform. We ran a bash script that allowed us to collect all 
+the profilers for timing, sampling and memory for all implementations of Sets and 
+PriorityQueue. The raw data is included in the tarball. However, not all the data
+was relevant to our analysis. Below are only pieces of data that are necessary and significant
+in letting us explain our predictions and conclusions of the Set and PriorityQueue
+dataset when trying to run the Unique program (inputting n number of integers and only
+printing the unique elements). 
+
+Note about the Sampling profiler:
+Here we only showed the timing profiles for the smaller data sets (1k, 4k) because
+for large data sets (especially the 100k), the timing profile takes too long to
+reasonably run each implementation before the assignment is due. For such large data
+sets, the sampler profiles were used to get a look at the time spent in each method.
+Also, the sampler profile takes a snapshot every so often of where we are in the program
+while it is running. On the other hand, the timing profile times how much time is spent
+in each method and adds it up. This gives an accurate comparison of the time spent in
+each method. The sampler profiles are useful guides of getting an idea of how often
+we are in a method, but it can also be misleading. In addition, the proportions of time
+in percentages are very different; the sampler profiles show very high percentages in
+the find method but when compared to the timing profile, the integer comparisons and
+find methods are much closer. 
+The sampler profiles showed that most of the snapshots were in the
+find or contains method of each of the implementations. However, the timing profiles
+of CPU time showed that most of the time was actually spent doing integer
+comparisons and finding the index and the contains method. These comparisons
+did not show up in the sampler profiles because each comparison is too fast,
+but there are so many that the small time of each comparison adds up quickly,
+as seen in the timing profile. In summary, the sampler profiles are inaccurate
+depictions of the runs. We decided to rely on the CPU timing profiles to support
+our predictions of how each implementation works.
+We ran the sampling profiler for all implementations on all data sets. They are attached.
+---------------------------------------------------------------------------------
+PROBLEM 1
+---------------------------------------------------------------------------------
+
+ARRAYLIST SET
+====running RANDOM=========
+1 k        10k         100k
+---------------------------
+0.08165    0.544011    12.079921
+0.078393   0.54697     11.498397
+0.086149   0.501842    11.532333
+
+====running MIXED=========
+1 k        10k         100k
+---------------------------
+0.069681   0.326884    3.953807
+0.073675   0.330354    3.885022
+0.068934   0.326154    3.856483
+
+====running BIASED=========
+1 k        10k         100k
+---------------------------
+0.054865   0.183284    1.102467
+0.056169   0.184939    1.128268
+0.057613   0.183494    1.125774
+
+
+ARRAY SET
+====running RANDOM=========
+1 k        10k         100k
+---------------------------
+0.10334   0.473462    11.302372
+0.09071   0.447857    11.230698
+0.08169   0.511692    11.031268
+
+====running MIXED=========
+1 k        10k         100k
+---------------------------
+0.07455   0.321909    3.830117
+0.06707   0.321492    3.802342
+0.07272   0.329407    3.831707
+
+====running BIASED=========
+1 k        10k         100k
+---------------------------
+0.054865   0.17925    1.088167
+0.056169   0.17794    1.116241
+0.057613   0.18673    1.099144
+
+
+LINKEDLIST SET
+====running RANDOM=========
+1 k        10k         100k
+---------------------------
+0.10334   0.794726    70.279935
+0.09071   0.796691    71.435238
+0.08169   0.780134    71.260717
+
+====running MIXED=========
+1 k        10k         100k
+---------------------------
+0.06966   0.474123    13.52459
+0.06686   0.461029    13.80544
+0.06570   0.480918    13.76275
+
+====running BIASED=========
+1 k        10k         100k
+---------------------------
+0.053847   0.202707    2.051032
+0.052568   0.198775    2.032967
+0.051834   0.193395    2.029636
+
+LISTSET
+====running RANDOM=========
+1 k        10k         100k
+---------------------------
+0.10089   0.776501   64.429004
+0.08706   0.789304   65.165946
+0.07886   0.819596   64.794583
+
+====running MIXED=========
+1 k        10k         100k
+---------------------------
+0.074725   0.473162    14.212974
+0.064962   0.470554    14.156271
+0.071808   0.467412    14.128576
+
+====running BIASED=========
+1 k        10k         100k
+---------------------------
+0.053082   0.192093    2.71747
+0.051442   0.207265    2.72313
+0.061223   0.197124    2.77257
+
+For the first four implementations of set we expect an asymptotic growth of n^2.
+That is we expect that in the worst case scenario the time taken to run the task
+will grow as a function of the size of the dataset in a quadratic manner. This is
+expected because all of the first four implementations of set (ArraySet,
+ArrayListSet, ListSet, LinkedListSet) have to iterate over the data n (number of
+unique elements) times in the worst case scenario (the data point was not present
+in the set). If this is done n times for n unique items, it takes a total of n^2
+time. The random dataset provided gives us a direct prove of this behavior. Because
+this dataset contains only unique items, the Sets are working under worst case
+scenario. Examining the data we see that for all the four implementations, if we
+plot the average time taken per run against the size of the data set(1k, 10k, 100k)
+in excel we see a quadratic growth, as expected. 
+
+While the asymptotic behavior of the four implementations is equivalent, there is a
+significant difference between the List (both ListSet and LinkedListSet) and the 
+Array (ArraySet and ArrayListSet) implementations. In order of speed from fastest to 
+slowest is ArraySet, ArrayListSet, ListSet, and LinkedList. We suspect the array implementations
+take less time than the list implementations because the list implementations need to
+create a new Node object and allocate memory for it each time a unique element is
+inserted into the set. On the other hand, the array implementations only needs to
+resize and create a new larger array when necessary. In the random data set, this
+happens log n (n is the number of unique elements) times because each element will
+be inserted. For the mixed and biased data sets, there is still a significant
+difference in run time between array and list implementations, but the difference
+is smaller. This is because there are less unique elements and therefore the list
+implementation requires less calls for allocations than for the random data set.
+
+Below we are showing some data from the memory profiles for all four implementations
+running under the random10k.txt dataset. This will elucidate why the Array
+implementations take less time in general than the List implementations.
+
+MEMORY PROFILES
+ListSet
+    1 25.03% 25.03%   3040000 10000   3040000 10000 300971 int[]
+    2 13.83% 38.87%   1680000 10000   1680000 10000 300972 int[]
+    4  7.96% 58.69%    966720 10070    966720 10070 300968 int[]
+    7  5.93% 80.44%    720000 30000    720000 30000 300974 java.lang.String
+    9  1.98% 85.05%    240000 10000    240000 10000 300980 ListSet$Node
+   10  1.98% 87.02%    240000 10000    240000 10000 300983 java.lang.String
+   
+LinkedListSet
+    1 24.52% 24.52%   3040000 10000   3040000 10000 300971 int[]
+    2 13.55% 38.07%   1680000 10000   1680000 10000 300972 int[]
+    4  7.80% 57.49%    966720 10070    966720 10070 300968 int[]
+    7  5.81% 78.80%    720000 30000    720000 30000 300974 java.lang.String
+    9  1.94% 83.31%    240000 10000    240000 10000 300986 java.lang.String
+   10  1.94% 85.25%    240000 10000    240000 10000 300982 java.util.LinkedList$Node
+
+ArraySet
+    1 25.30% 25.30%   3040000 10000   3040000 10000 300971 int[]
+    2 13.98% 39.28%   1680000 10000   1680000 10000 300972 int[]
+    4  8.04% 59.30%    966720 10070    966720 10070 300968 int[]
+    7  5.99% 81.29%    720000 30000    720000 30000 300974 java.lang.String
+    9  2.00% 85.94%    240000 10000    240000 10000 300984 java.lang.String
+   10  1.34% 87.28%    161120 10070    161120 10070 300969 int[]
+   11  1.33% 88.61%    159968 9998    159968  9998 300979 java.lang.Integer
+   12  1.33% 89.94%    159968 9998    159968  9998 300978 java.lang.Integer
+   14  1.09% 92.21%    131288   14    131288    14 300980 java.lang.Object[]
+
+ArrayListSet
+    1 25.16% 25.16%   3040000 10000   3040000 10000 300971 int[]
+    2 13.90% 39.06%   1680000 10000   1680000 10000 300972 int[]
+    4  8.00% 58.97%    966720 10070    966720 10070 300968 int[]
+    7  5.96% 80.83%    720000 30000    720000 30000 300974 java.lang.String
+    9  1.99% 85.46%    240000 10000    240000 10000 300984 java.lang.String
+   10  1.41% 86.87%    170016   31    170016    31 300061 java.lang.Object[]
+
+For ListSet implementation, the 9th row shows ListSet$Node, which is the creation
+of new Nodes. It creates 10k new Nodes for the 10k unique elements.
+For LinkedListSet implementation, the 10th row shows java.util.LinkedList$Node,
+which is also the creation of new Nodes. It creates 10k new Nodes for the
+10k unique elements.
+For ArraySet implementation, the 14th row shows java.lang.Object[], which is
+the creation of new Array objects. It creates 14 new array objects for the
+10,000 unique elements because each time we grow the array, we double it.
+2^14 is 16384, which holds all 10k elements.
+For the ArrayListSet implementation, the 10th row shows java.lang.Object[],
+which is the creation of new ArrayList objects. It creates 31 new ArrayList
+objects but the Java documentation does not explain exactly how the arrays
+are resized. However, this is similar to the way ArraySet works so their times
+are comparable, and significantly different from List implementations.
+
+To summarize, Arrays only allocate more memory each time it resizes. However,
+each time it resizes, a larger chunk of memory is needed. On the other hand,
+the nodes require very little memory per allocation, but it needs to create
+a new allocation for each unique element inserted. This then creates the variation
+in times between Array implementations and List implementations. We ran memory profiles 
+for all datasets (random, mixed, biased with 1k, 10k, 100k) for all four implementations
+and they all exhibited the memory allocation behavior expected. 
+
+However, this small runtime differences between the implementations do not address 
+the general quadratic behavior we discussed previously. Our conclusion is that the main
+overhang in efficiency of these implementations (other than the Java I/O mechanisms used by
+Unique) is the way we are searching for existance of elements to be inserted in the set. 
+That is we are doing a linear search over the set every time we are inserting a new 
+element. This means that the implementations are spending most of their time searching
+for the existance of a value in the set, hindering the efficiency of our implementation. 
+This pattern of behavior is clear when we see the timing profilers below.
+
+TIMING PROFILES
+ArraySet
+    random1k
+        1 28.25% 28.25%  499500 304538 java.lang.Integer.equals
+        2 14.80% 43.05%    1000 304528 ArraySet.find
+    mixed1k
+        1 15.50% 15.50%  181774 304533 java.lang.Integer.equals
+        2  8.56% 24.06%    1000 304523 ArraySet.find
+    biased1k
+        1  3.06%  3.06%   26159 304538 java.lang.Integer.equals
+        3  2.00%  7.58%   26159 304537 java.lang.Integer.intValue
+        6  1.82% 13.16%    1000 304528 ArraySet.find
+
+    random4k
+        1 42.23% 42.23% 7998000 304537 java.lang.Integer.equals
+        2 24.11% 66.34%    4000 304527 ArraySet.find
+    mixed4k
+        1 34.48% 34.48% 2937133 304539 java.lang.Integer.equals
+        2 20.08% 54.56%    4000 304525 ArraySet.find
+    biased4k
+        1 14.97% 14.97%  468707 304535 java.lang.Integer.equals
+        2  8.21% 23.17%    4000 304525 ArraySet.find
+
+ArrayListSet
+    random1k
+        1 26.40% 26.40%  499500 304554 java.lang.Integer.equals
+        2 14.86% 41.26%    1000 304540 java.util.ArrayList.indexOf
+    mixed1k
+        1 15.17% 15.17%  181774 304550 java.lang.Integer.equals
+        2  9.69% 24.86%    1000 304536 java.util.ArrayList.indexOf
+    biased1k
+        1  3.98%  3.98%   26159 304554 java.lang.Integer.equals
+        6  1.90% 14.48%    1000 304540 java.util.ArrayList.indexOf
+        
+    random 4k
+        1 42.62% 42.62% 7998000 304554 java.lang.Integer.equals
+        2 24.09% 66.70%    4000 304540 java.util.ArrayList.indexOf
+    mixed 4k
+        1 34.30% 34.30% 2937133 304556 java.lang.Integer.equals
+        2 19.69% 54.00%    4000 304538 java.util.ArrayList.indexOf
+    biased 4k
+        1 14.73% 14.73%  468707 304553 java.lang.Integer.equals
+        2  8.69% 23.43%    4000 304539 java.util.ArrayList.indexOf
+
+LinkedListSet
+    random 1k
+        1 26.65% 26.65%  499500 304554 java.lang.Integer.equals
+        2 15.50% 42.15%    1000 304541 java.util.LinkedList.indexOf
+    mixed 1k
+        1 15.97% 15.97%  181774 304550 java.lang.Integer.equals
+        2  8.24% 24.21%    1000 304537 java.util.LinkedList.indexOf
+    biased 1k
+        1  3.99%  3.99%   26159 304553 java.lang.Integer.equals
+        4  2.44% 12.63%    1000 304540 java.util.LinkedList.indexOf
+    
+    random 4k
+        1 42.69% 42.69% 7998000 304554 java.lang.Integer.equals
+        2 24.51% 67.21%    4000 304541 java.util.LinkedList.indexOf
+    mixed 4k
+        1 34.77% 34.77% 2937133 304556 java.lang.Integer.equals
+        2 19.59% 54.36%    4000 304539 java.util.LinkedList.indexOf
+    biased 4k
+        1 14.64% 14.64%  468707 304552 java.lang.Integer.equals
+        2  8.86% 23.50%    4000 304539 java.util.LinkedList.indexOf
+
+ListSet
+    random 1k
+        1 27.04% 27.04%  499500 304543 java.lang.Integer.equals
+        2 16.66% 43.70%    1000 304527 ListSet.find
+    mixed 1k
+        1 17.45% 17.45%  179539 304540 java.lang.Integer.equals
+        2  8.30% 25.75%    1000 304524 ListSet.find
+    biased 1k
+        1  4.22%  4.22%   27635 304544 java.lang.Integer.equals
+        4  2.35% 12.61%    1000 304528 ListSet.find
+    
+    random 4k
+        1 42.45% 42.45% 7998000 304543 java.lang.Integer.equals
+        2 24.58% 67.03%    4000 304527 ListSet.find
+    mixed 4k
+        1 34.76% 34.76% 2905026 304545 java.lang.Integer.equals
+        2 19.42% 54.18%    4000 304525 ListSet.find 
+    biased 4k
+        1 14.60% 14.60%  452769 304542 java.lang.Integer.equals
+        2  7.87% 22.46%    4000 304526 ListSet.find
+
+
+SAMPLER PROFILES
+ ArrayListSet
+    random 100k
+       1 89.31% 89.31%    1128 300169 ArrayListSetUnique.main
+       3  1.27% 94.46%      16 300163 java.util.ArrayList.contains
+       7  0.32% 95.88%       4 300192 java.lang.System.arraycopy
+       8  0.32% 96.20%       4 300161 java.util.ArrayList.contains
+    
+    mixed 100k
+       1 79.23% 79.23%     351 300174 ArrayListSetUnique.main
+       3  1.81% 86.46%       8 300167 java.util.ArrayList.contains
+       5  0.90% 88.26%       4 300168 java.util.ArrayList.contains
+       8  0.68% 90.29%       3 300155 java.util.Arrays.copyOfRange
+       9  0.68% 90.97%       3 300187 java.lang.System.arraycopy
+   
+    biased 100k
+       1 53.28% 53.28%      65 300174 ArrayListSetUnique.main
+       4  2.46% 64.75%       3 300192 java.lang.System.arraycopy
+       8  0.82% 68.85%       1 300162 java.util.Arrays.copyOfRange
+       9  0.82% 69.67%       1 300163 java.util.ArrayList.add
+      16  0.82% 75.41%       1 300171 java.util.ArrayList.contains
+      17  0.82% 76.23%       1 300172 java.util.ArrayList.contains
+ 
+ ArraySet
+    random 100k
+       1 89.07% 89.07%    1133 300173 ArraySetUnique.main
+       3  1.02% 93.87%      13 300166 ArraySet.has
+       8  0.31% 95.68%       4 300175 ArraySetUnique.main
+       9  0.24% 95.91%       3 300179 java.util.Scanner.hasNextInt
+      10  0.24% 96.15%       3 300168 ArraySet.has
+    
+    mixed 100k
+       1 79.60% 79.60%     359 300176 ArraySetUnique.main
+       3  1.11% 87.14%       5 300169 ArraySet.has
+       6  0.44% 89.14%       2 300203 java.lang.Integer.toString
+       9  0.44% 90.47%       2 300179 ArraySetUnique.main
+      12  0.22% 91.13%       1 300170 ArraySet.has
+    
+    biased 100k
+       1 55.91% 55.91%      71 300177 ArraySetUnique.main
+       5  1.57% 67.72%       2 300174 ArraySet.has
+      14  0.79% 75.59%       1 300170 ArraySet.insert
+      15  0.79% 76.38%       1 300171 ArraySet.has
+ 
+ LinkedListSet
+    random 100k
+       1 97.67% 97.67%    6876 300162 java.util.LinkedList.indexOf
+       7  0.07% 98.96%       5 300164 java.util.LinkedList.contains
+       8  0.07% 99.03%       5 300173 LinkedListSetUnique.main
+      11  0.06% 99.23%       4 300157 java.util.Arrays.copyOfRange
+      13  0.04% 99.32%       3 300207 java.lang.System.arraycopy
+      14  0.03% 99.35%       2 300172 LinkedListSetUnique.main
+      17  0.03% 99.43%       2 300171 LinkedListSet.insert 
+    
+    mixed 100k
+       1 93.08% 93.08%    1398 300162 java.util.LinkedList.indexOf
+       5  0.47% 96.34%       7 300157 java.util.LinkedList.contains
+       6  0.33% 96.67%       5 300189 java.lang.System.arraycopy
+       9  0.13% 97.40%       2 300167 LinkedListSetUnique.main
+      11  0.13% 97.67%       2 300168 LinkedListSetUnique.main    
+    
+    biased 100k
+       1 70.69% 70.69%     164 300169 java.util.LinkedList.indexOf
+       3  2.59% 77.59%       6 300174 java.util.LinkedList.linkLast
+       5  2.16% 81.90%       5 300163 java.util.LinkedList.contains
+       9  0.86% 86.21%       2 300170 LinkedListSet.insert
+ 
+ ListSet
+    random 100k
+       1 97.84% 97.84%    6519 300164 ListSet.find
+       3  0.17% 98.77%      11 300173 ListSetUnique.main
+      11  0.03% 99.29%       2 300174 ListSetUnique.main
+      12  0.03% 99.32%       2 300163 java.lang.String.<init>
+      13  0.03% 99.35%       2 300170 ListSet.has
+    
+    mixed 100k
+       1 94.00% 94.00%    1458 300161 ListSet.find
+       6  0.19% 97.10%       3 300192 java.lang.System.arraycopy
+       7  0.13% 97.23%       2 300160 ListSet.has
+       8  0.13% 97.36%       2 300171 ListSet$Node.<init>
+      10  0.13% 97.61%       2 300157 java.util.Arrays.copyOfRange
+      12  0.13% 97.87%       2 300169 ListSetUnique.main
+
+    biased 100k
+       1 76.53% 76.53%     225 300174 ListSet.find
+       5  1.02% 83.67%       3 300182 ListSet$Node.<init>
+       8  0.68% 86.05%       2 300192 java.lang.System.arraycopy
+      10  0.68% 87.41%       2 300168 ListSet.has
+      11  0.68% 88.10%       2 300166 ListSet.has
+
+Each implementation was run with the 3 data sets (random, mixed, biased) with
+1k and 4k elements. We started with 1k data sets which showed that the Java
+Integer comparisons take the most time, always in row 1. This makes sense
+because this is the operation that is done more often than any other;
+the set must compare every new integer with all existing ones. The second
+method that is relevant is the find or indexOf methods, which do the actual
+finding to see if the element to be inserted (or removed)is in the set. The
+other methods are irrelevant because they are from the Java library related
+to getting input and output, which do not affect our analysis of the implementations.
+However, for the biased data set, it was not obvious that the find and indexOf
+methods were accessed as frequently.
+
+To confirm these preliminary trends, we used 4k data sets (big enough to
+show accuracy, but small enough to be ran by the timing profiler). In all
+of these runs, the first row was the integer comparison, and the second row
+was the find or indexOf method. This confirms our prediction that the biggest
+efficiency overhang was finding whether or not the new element was already in
+the set. The Java integer comparison is from the Java library and so we cannot
+improve the efficiency of that. This creates the base cases for the later problems.
+
+
+
+---------------------------------------------------------------------------------
+PROBLEM 2
+---------------------------------------------------------------------------------
+
+MOVETOFRONT
+=======running RANDOM==========
+1 k        10k         100k
+-------------------------------
+0.101622   0.767417    58.228552
+0.098436   0.795859    56.859962
+0.085509   0.770339    57.56357
+
+========running MIXED==========
+1 k        10k         100k
+-------------------------------
+0.066844   0.509798    19.354602
+0.067702   0.493994    19.593455
+0.06752    0.518642    18.83702
+
+========running BIASED=========
+1 k        10k         100k
+-------------------------------
+0.057975   0.196696    3.427853
+0.055364   0.202447    3.405026
+0.055526   0.205186    3.458179
+
+
+MAKING MOVE TO FRONT BETTER THAN LISTSET
+
+LISTSET
+=====running HeavilyBiased=====
+10k             100k
+-------------------------------
+0.430271        17.263606
+
+MOVETOFRONT
+=====running HeavilyBiased=====
+10k             100k
+-------------------------------
+0.352418        7.619023
+
+
+MoveToFrontSet
+TIMING PROFILES
+    heavilybiased 4k
+       1 33.19% 33.19% 2003999 304540 java.lang.Integer.equals
+       2 19.83% 53.02%    4000 304524 MoveToFrontSet.find
+
+    heavilybiased 10k
+       1 41.77% 41.77% 12511499 304540 java.lang.Integer.equals
+       2 24.60% 66.38%   10000 304524 MoveToFrontSet.find
+    
+    random 4k
+       1 42.17% 42.17% 7998000 304543 java.lang.Integer.equals
+       2 24.52% 66.69%    4000 304527 MoveToFrontSet.find
+    
+    mixed 4k
+       1 34.87% 34.87% 2915648 304546 java.lang.Integer.equals
+       2 19.37% 54.25%    4000 304526 MoveToFrontSet.find
+ 
+    biased 4k
+       1 14.17% 14.17%  457460 304542 java.lang.Integer.equals
+       2  8.48% 22.65%    4000 304526 MoveToFrontSet.find
+
+ListSet
+    heavilybiased 4k (shuffled)
+        1 39.58% 39.58% 4053797 304546 java.lang.Integer.equals
+        2 22.26% 61.84%    4000 304526 ListSet.find
+MoveToFrontSet
+    heavilybiased 4k (shuffled)
+        1 32.41% 32.41% 2004998 304545 java.lang.Integer.equals
+        2 18.23% 50.64%    4000 304525 MoveToFrontSet.find
+    
+    heavilybiased 10k (shuffled)    
+        1 41.24% 41.24% 12512498 304541 java.lang.Integer.equals
+        2 24.40% 65.64%   10000 304525 MoveToFrontSet.find
+
+MEMORY PROFILES
+    random 10k
+        1 25.03% 25.03%   3040000 10000   3040000 10000 300971 int[]
+        2 13.83% 38.86%   1680000 10000   1680000 10000 300972 int[]
+        4  7.96% 58.67%    966720 10070    966720 10070 300968 int[]
+        9  1.98% 85.03%    240000 10000    240000 10000 300980 MoveToFrontSet$Node
+
+SAMPLING PROFILES
+    random 100k
+       1 97.63% 97.63%    5799 300164 MoveToFrontSet.find
+       5  0.08% 98.96%       5 300171 MoveToFrontSetUnique.main
+       6  0.07% 99.02%       4 300172 MoveToFrontSetUnique.main
+       7  0.05% 99.07%       3 300163 MoveToFrontSet.has
+      10  0.05% 99.23%       3 300166 MoveToFrontSet.has
+    
+    mixed 100k
+       1 95.64% 95.64%    1952 300165 MoveToFrontSet.find
+       6  0.15% 97.75%       3 300163 MoveToFrontSet.has
+       9  0.10% 98.04%       2 300169 MoveToFrontSet.has
+    
+    biased 100k
+       1 82.76% 82.76%     312 300173 MoveToFrontSet.find
+       5  0.80% 88.06%       3 300176 MoveToFrontSet$Node.<init>
+       6  0.53% 88.59%       2 300158 java.util.Arrays.copyOfRange
+      18  0.27% 92.04%       1 300174 MoveToFrontSet.has
+
+    
+The MoveToFrontSet implementation swaps values that have been recently
+accessed to the front of the set. Then when that value is linearly
+searched for again, it will be found earlier, making the run time more
+efficient. Thus, the heuristic gives a loose sorting by frequency; where more
+accessed values will be closer to the beggining of the Set. It is expected that 
+for a dataset that has all unique values, this heuristic would slow the process,
+as the moving action takes time, but is not used at all. This is backed up by the
+fact that MoveToFrontSet performs slower than every previous implementation with
+the random (1k,10k,100k) datasets. 
+
+We expected this implementation to be more efficient than
+the previous implementations, in the mixed and biased datasets, as they had 
+repeated values. However, it was actually slower. 
+
+To test out why this was slower, we created a heavily biased data set to
+exaggerate the effects of repeated elements. To generate such file we used
+Java ArrayList data structure and filled it with integers from 1 to 100000. We
+used the shuffle method to shuffle the arraylist. Then in iterations of 1000,
+1000 integers from the arraylist were added, then 1000 0 were added, so on
+and so forth (code can be seen in Generator.java). This is HeavilyBiased, and
+has a clear very repeated request for 0. The results showed that in this data set,
+MoveToFrontSet was actually faster. This was very obvious with 100k elements,
+where MoveToFrontSet is clearly far more advantageous than regular ListSet.
+A sensible explanation for this behavior is that after inserting the first 0
+after 1000 unique integers, when ListSet tries to insert 0 again, it iterates
+over 1000 numbers, figures out 0 is in the Set and does not insert. MoveToFront
+moves 0 to the front of the List. Then the next time, regular ListSet iterates
+1000 times, while MoveToFrontSet finds 0 in constant time. This is repeated
+1000 times, making it obvious how MoveToFrontSet cuts running time.
+
+The memory profiler shows that MoveToFront is no different from the other List
+implementations because it still has to allocate memory for a Node object everytime
+it inserts an element into the set. The only difference is that there is references
+manipulation every time the find function is ran. This does not affect the number
+or size of memory allocations, but it does affect the time spent in find. However,
+when the dataset is biased enough, this additional cost is counterbalanced by
+not having to iterate over as many objects in the set as in a normal ListSet.
+
+
+
+---------------------------------------------------------------------------------
+PROBLEM 3
+---------------------------------------------------------------------------------
+
+OrderedArraySet
+=======running RANDOM==========
+1 k        10k         100k
+-------------------------------
+0.102523   0.493298    10.224965
+0.088124   0.476875    9.885441
+0.087821   0.53241     9.805475
+
+========running MIXED==========
+1 k        10k         100k
+-------------------------------
+0.08923    0.297069    2.777993
+0.070326   0.303549    2.755027
+0.084554   0.295168    2.794333
+
+========running BIASED=========
+1 k        10k         100k
+-------------------------------
+0.079974   0.178236    0.538469
+0.056055   0.183664    0.560009
+0.056161   0.190767    0.546765
+
+MEMORY PROFILES
+    random 10k
+        1 25.29% 25.29%   3040000 10000   3040000 10000 300971 int[]
+        2 13.98% 39.27%   1680000 10000   1680000 10000 300972 int[]
+        4  8.04% 59.29%    966720 10070    966720 10070 300968 int[]
+       10  1.34% 87.26%    161120 10070    161120 10070 300969 int[]
+       11  1.33% 88.59%    159968 9998    159968  9998 300979 java.lang.Integer
+       12  1.33% 89.92%    159968 9998    159968  9998 300978 java.lang.Integer
+       13  1.17% 91.10%    141200   69    141200    69 300970 char[]
+       14  1.09% 92.19%    131288   14    131288    14 300980 java.lang.Comparable[]
+
+TIMING PROFILES
+    random 4k
+       1  2.42%  2.42%   64103 304537 java.lang.Integer.compareTo
+       4  2.12%  9.06%   64103 304538 java.lang.Integer.compareTo
+      17  1.20% 29.53%    4000 304527 OrderedArraySet.find
+    
+    mixed 4k
+       5  2.10% 11.95%   56027 304540 java.lang.Integer.compareTo
+       6  2.05% 14.00%   56027 304539 java.lang.Integer.compareTo
+      14  1.38% 27.38%    4000 304525 OrderedArraySet.find
+    
+    biased 4k
+       2  3.19%  6.92%   31521 304393 java.nio.CharBuffer.charAt
+       8  1.88% 19.59%   41964 304535 java.lang.Integer.compareTo
+      15  1.61% 31.71%   41964 304536 java.lang.Integer.compareTo
+      19  1.30% 37.17%    4000 304525 OrderedArraySet.find
+
+
+SAMPLING PROFILES
+    random 100k
+      1 89.00% 89.00%     922 300170 OrderedArraySetUnique.main
+       5  0.39% 94.98%       4 300183 OrderedArraySet.find
+       7  0.29% 95.56%       3 300173 OrderedArraySetUnique.main
+      10  0.19% 96.14%       2 300178 OrderedArraySetUnique.main
+      13  0.10% 96.53%       1 300171 OrderedArraySet.found
+    
+    mixed 100k
+       1 71.61% 71.61%     222 300168 OrderedArraySetUnique.main
+       3  0.97% 84.52%       3 300164 OrderedArraySet.find
+       4  0.97% 85.48%       3 300172 OrderedArraySetUnique.main
+       8  0.32% 87.42%       1 300165 java.lang.Integer.equals
+      14  0.32% 89.35%       1 300173 java.lang.System.arraycopy
+      15  0.32% 89.68%       1 300174 OrderedArraySetUnique.main
+      18  0.32% 90.65%       1 300177 OrderedArraySet.find
+    
+    biased 100k
+       2 18.31% 38.03%      13 300177 OrderedArraySetUnique.main
+       5  2.82% 47.89%       2 300185 java.lang.System.arraycopy
+       6  1.41% 49.30%       1 300159 OrderedArraySet.insert
+       7  1.41% 50.70%       1 300160 OrderedArraySetUnique.main
+       8  1.41% 52.11%       1 300161 java.lang.System.arraycopy
+
+
+
+In problem 2 we saw that the move-to-front heuristic only worked well
+for heavily biased data sets. This poses a problem to make our solution more
+efficient. It is not the goal of an implementation to be only better under
+a specific set of conditions, but to be better in general, regardless of
+input. We cannot assume that we will know how biased a data set is, so it
+is best to be prepared for the worst case.
+
+It is obvious from the timing profiles that find is still one of the major
+time overhangs in our process of printing unique numbers from input. Thus,
+it would be beneficial to modify our search algorithm, now that we have an
+ordered set. Up until now we have used linear search in all our implementations
+to search for the existance of an element in our Set because they were unordered.
+Thus asymptotically finding this is a process that takes O(n) time. By ordering
+the elements, it is possible to use a different search algorithm. We used binary
+search, which behaves asymptotically in O(log n) time; faster than the linear
+search of the previous implementations. 
+
+OrderedArraySet then behaves asymptotically with O(nlog n). This is so because
+if tasked with n unique numbers, then it has to find the location of where to
+insert(or remove) which takes logn time thanks to binary search; and it has to
+do so n times. This is better than the quadratic n^2 behavior for the previous
+5 implementations. Furthermore, the implementation uses an array so it is more
+efficient than using a List, as seen and explained in the earlier problems.
+
+As confirmed by the run times, the OrderedArraySet does indeed run faster
+in all 3 types of data sets (random, mixed, biased; with 1k, 10k, 100k elements)
+than the earlier implementations. When running with the random dataset, and then
+plotting the time data against the number of elements in excel (where it runs in
+the worst case scenario) it shows a nlogn curve of growth. This provides confident
+support in the asymptotic behavior of this OrderedArraySet Implementation.
+
+The memory profilers show that 14 Comparable arrays are created, which is what
+we expected because the arrays must be of type Comparable in order to be ordered.
+Each time the array is resized, it is doubled in length so 2^14 is 16384, which
+allows the 10k unique integers to fit in the final array for the random10k dataset
+that corresponds to the profile above. In general this is showing the predicted trend
+of Set implemented by arrays that double in size (log(n) + 1, n being the number
+of unique elements). We saw the same behavior when running memory profiles for
+all datasets (random, mixed, biased with 1k, 10k, 100k elements).
+
+The timing profilers show that the integer comparisons and find methods are not
+the first 2 rows like the earlier implementations. Also, the percentages themselves
+are much smaller, so less time relevant to the other functions is being spent on
+doing comparisons and finding. The other methods in between are from the Java
+library, somewhat irrelevant to what we are looking at. As we move from random to
+mixed to biased, comparison and find move down in the rows, meaning even less
+time is being spent in those methods. In the biased timing profile, they are in
+rows 8 and 19, respectively. This clearly shows support for the benefit of having
+actually altered the algorithm used by find to search for elements in the set. Now,
+in this implementation by keeping the set in order, it was possible to implement
+a binary search algorithm thus fundamentally boosting the performance of our program,
+for any possible dataset. 
+
+
+
+---------------------------------------------------------------------------------
+PROBLEM 4
+---------------------------------------------------------------------------------
+
+BinaryHeapPriorityQueue
+=======running RANDOM==========
+1 k        10k         100k
+-------------------------------
+0.108742   0.39094     0.933071
+0.085312   0.368731    0.919218
+0.083138   0.355013    0.91775   
+
+========running MIXED==========
+1 k        10k         100k
+-------------------------------
+0.096344   0.365101    0.949796
+0.086888   0.371653    0.931338
+0.080217   0.3755      0.97471
+
+========running BIASED=========
+1 k        10k         100k
+-------------------------------
+0.104806   0.392864    0.941059
+0.090749   0.366097    0.936209
+0.084403   0.353959    0.922093
+
+MEMORY PROFILES
+    random 10k
+        1 25.26% 25.26%   3040000 10000   3040000 10000 300973 int[]
+        2 13.96% 39.23%   1680000 10000   1680000 10000 300974 int[]
+        4  8.03% 59.23%    966720 10070    966720 10070 300970 int[]
+       10  1.34% 87.17%    161120 10070    161120 10070 300971 int[]
+       11  1.33% 88.50%    159968 9998    159968  9998 300981 java.lang.Integer
+       12  1.33% 89.83%    159968 9998    159968  9998 300980 java.lang.Integer
+       13  1.17% 91.00%    141200   69    141200    69 300972 char[]
+       14  1.09% 92.09%    131264   13    131264    13 300982 java.lang.Comparable[]
+
+TIMING PROFILES
+    random 4k
+        1  2.63%  2.63%   84979 304543 java.lang.Integer.compareTo
+        2  2.48%  5.11%   75920 304660 BinaryHeapPriorityQueue$DefaultComparator.compare
+        3  2.47%  7.58%   84979 304544 java.lang.Integer.compareTo
+        5  2.18% 12.01%   75920 304661 BinaryHeapPriorityQueue.less
+       42  0.55% 51.68%    4000 304664 BinaryHeapPriorityQueue.remove
+       50  0.51% 55.91%    9059 304547 BinaryHeapPriorityQueue.less
+       57  0.46% 59.26%   37344 304662 BinaryHeapPriorityQueue.swap
+       79  0.33% 67.78%    4000 304533 BinaryHeapPriorityQueue.swim
+       86  0.32% 70.05%   11999 304658 BinaryHeapPriorityQueue.top
+       87  0.30% 70.35%    9059 304545 BinaryHeapPriorityQueue$DefaultComparator.compare
+      140  0.17% 82.81%    4000 304534 BinaryHeapPriorityQueue.insert
+      144  0.16% 83.49%   11999 304657 BinaryHeapPriorityQueue.empty
+      178  0.12% 88.41%    4000 304566 BinaryHeapPriorityQueue.top
+   
+    mixed 4k
+       1  2.62%  2.62%   85009 304546 java.lang.Integer.compareTo
+       2  2.55%  5.18%   85009 304545 java.lang.Integer.compareTo
+       4  2.21%  9.71%   75801 304661 BinaryHeapPriorityQueue$DefaultComparator.compare
+       7  2.02% 15.85%    4000 304665 BinaryHeapPriorityQueue.sink
+       8  1.98% 17.84%   75801 304663 BinaryHeapPriorityQueue.less
+      37  0.70% 47.55%    3993 304666 BinaryHeapPriorityQueue.remove
+      46  0.58% 53.40%   37294 304664 BinaryHeapPriorityQueue.swap
+      50  0.56% 55.66%    4000 304531 BinaryHeapPriorityQueue.swim
+      62  0.43% 61.57%   11985 304660 BinaryHeapPriorityQueue.top
+     130  0.20% 81.33%   11986 304658 BinaryHeapPriorityQueue.empty
+     139  0.17% 82.92%    4000 304532 BinaryHeapPriorityQueue.insert
+
+    biased 4k
+       1  2.67%  2.67%   75699 304664 BinaryHeapPriorityQueue.less
+       3  2.62%  7.93%   84954 304543 java.lang.Integer.compareTo
+       4  2.33% 10.26%   75699 304662 BinaryHeapPriorityQueue$DefaultComparator.compare
+       6  2.04% 14.58%    4000 304666 BinaryHeapPriorityQueue.sink
+      38  0.65% 49.07%    3963 304667 BinaryHeapPriorityQueue.remove
+      44  0.57% 52.73%   11925 304661 BinaryHeapPriorityQueue.top
+      60  0.43% 60.85%   37160 304665 BinaryHeapPriorityQueue.swap
+      65  0.39% 62.88%    4000 304532 BinaryHeapPriorityQueue.swim
+     142  0.18% 83.89%   11925 304660 BinaryHeapPriorityQueue.empty
+     201  0.10% 91.77%    3963 304569 BinaryHeapPriorityQueue.top
+     214  0.09% 92.97%    5262 304551 BinaryHeapPriorityQueue.swap
+
+
+BinaryHeapPriorityQueue is a significantly different approach to this problem
+from the earlier set implementations. Here we are implementing a PriorityQueue.
+In priority queues there can be insertions of elements that are already present
+in the Queue. The only relevant element is the top one, which will always be
+the "largest" element. To implement the PriorityQueue we use a BinaryHeap data
+structure. Also, in a BinaryHeapPriorityQueue, we are creating a data structure
+that looks like a binary tree. It is a binary heap because each parent has at
+most two children that are less than the parent.
+
+In this data structure the insert method (and remove) work in O(logn) time. This
+is because by using a binary heap that lets an element swim up to its position
+in the priority queue it'll take at most log(n) steps to do so (n being the size
+of the binary heap). In comparison, in the OrderedArray, we could  find the
+location to insert in log(n) time with binary search, but in the worst case scenario,
+we would insert and all the remaining n-1 elements would have to shift right
+(i.e. when inserting the smallest integer). Therefore, it is expected that a Unique
+program running with a BinaryHeapPriorityQueue should run faster in general than
+previous Set implementations, regardless of the dataset. Moreover, PriorityQueues
+allow repeats, so there should be no runtime difference with the different datasets. 
+
+The memory profile shows that we make 13 memory allocations of Comparable
+arrays. Note that we must use Comparable objects in our implementation in order
+for the heap to have some order. We make 13 because we start the root at index 1;
+this makes the algorithm for coordinating with its respective children much
+simpler. Thus, we initialize the array to length 2, so we only need 13 more allocations,
+creating 2^(1+13) = 2^14 indices to fit all 10k unique elements to be inserted.
+
+The timing profiles above only show the stats of the relevant methods; the ommitted
+rows are those of methods from the Java library that are irrelevant to our analysis.
+For random and mixed, the most time consuming method is the compareTo method,
+as expected. The less method is used in most of the methods to compare and see if
+the element needs to be rearranged, so it makes sense that a lot of time is spent
+in the less method. However, all of these funcions, are only used about 2% of the time, 
+making it obvious that our program is not spending too much time in any particular function
+call; even in its most used function. 
+
+In summary, the data provided by runtime performance provides evidence for the asymptotic
+behavior of the implementation when plotted in excel. Moreover, it shows faster runtime 
+performance than all previous implementations, as expected by our analysis. Lastly, it also
+shows equal performance regardless of the data set, which is also in accordance with 
+the analysis we provided above. 

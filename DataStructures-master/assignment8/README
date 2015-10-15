@@ -1,0 +1,564 @@
+Emily Wagner ewagne14@jhu.edu
+Jose Nino Rivera jnino1@jhu.edu
+600.226 Data Structures
+Assignment 8: Hashing Out Spells
+4/11/14
+
++++++++++++
+PROBLEM 1 +
++++++++++++
+In order to fix the ChainingHashMap implementation, it was necessary to implement the
+private grow method, which will be access everytime the Hash Table reaches an alpha factor
+of 0.9, A new ArrayList double the size of the old one will be created, and all the items
+from the old ArrayList will be rehashed into the new ArrayList. Rehashing in place 
+is not a viable option since this would cause conflicts. For instance, a value that has been 
+previously rehashed might be hashed again when growing.
+
+
++++++++++++
+PROBLEM 2 +
++++++++++++
+For problem 2 we took the fixed Chaining solution for collsions from problem 1 and ran a couple
+of experiments. This experiments provided valuable information. The loading times for all experi
+ments were comparable as expected because we were loading the same dictionary. However, lookup
+times were naturally longer in shakespeare. Due to the nature of having a bigger text file to search
+for spelling mistakes. 
+
+Experiments:
+ChainingHashMap
+---------------------------------------------------------
+Empty Dictionary	congo.txt	shakespeare.txt
+
+Load times :		
+			0.001741	0.002173
+			0.002157	0.002436
+			0.002646	0.001707
+Execution Times :		
+			1.033744	6.934157
+			0.797476	7.012064
+			0.785402	6.124142
+---------------------------------------------------------
+Averages		
+Load times :		0.0021813333	0.0021053333
+Execution Times :	0.8722073333	6.690121
+---------------------------------------------------------
+
+		
+cracklib.txt dictionary	congo.txt	shakespeare.txt
+---------------------------------------------------------	
+Load times :		
+			0.460019	0.486817
+			0.37948		0.482671
+			0.400753	0.391971
+Execution Times :		
+			0.279127	1.779328
+			0.271861	1.837363
+			0.292803	1.449207
+---------------------------------------------------------
+Averages 
+Load times :		0.4134173333	0.4538196667
+Execution Times :	0.2812636667	1.6886326667
+---------------------------------------------------------
+
+-------------------------------------------------
+MEMORY PROFILES: CHAINING HASH MAP
+-------------------------------------------------
+
+Memory Profile Hot Spots/Analysis:
+
+	ChainingHashMap: cracklib dictionary, congo txt
+		1) 131056 Objects Allocated, 3.61% of total memory allocated
+
+   			java.util.AbstractCollection.<init>(AbstractCollection.java:66)
+    			java.util.AbstractList.<init>(AbstractList.java:76)
+    			java.util.ArrayList.<init>(ArrayList.java:151)
+    			ChainingHashMap.grow(ChainingHashMap.java:160)
+
+	        2) 1.62% percent, 58982 allocations 
+    			ChainingHashMap$Entry.<init>(ChainingHashMap.java:30)
+    			ChainingHashMap.insert(ChainingHashMap.java:179)
+    			ChainingHashMap.grow(ChainingHashMap.java:164)
+    			ChainingHashMap.insert(ChainingHashMap.java:177)
+
+		3) 49125 Objects Allocoated: 1.08% of total memory allocated
+			
+    			ChainingHashMap$Entry.<init>(ChainingHashMap.java:30)
+    			ChainingHashMap.insert(ChainingHashMap.java:179)
+   			ChainingHashMapSpell.loadDictionary(ChainingHashMapSpell.java:23)
+   			ChainingHashMapSpell.main(ChainingHashMapSpell.java:37)
+ANALYSIS:
+Here we can see there are as many Entry’s created as there are words in cracklib.txt. 
+We also see that the number of allocations to the ArrayList is much greater than the number 
+of entry allocations — this is because the list grows by doubling but all values must be copied over.
+	
+	ChainingHashMap: cracklib dictionary, shakespeare txt
+
+		1)  1.39% of total memory 49125 allocations
+    			ChainingHashMap$Entry.<init>(ChainingHashMap.java:30)
+    			ChainingHashMap.insert(ChainingHashMap.java:179)
+    			ChainingHashMapSpell.loadDictionary(ChainingHashMapSpell.java:23)
+    			ChainingHashMapSpell.main(ChainingHashMapSpell.java:37)
+
+		2) 0.02% of total memory, 235 allocations
+			java.util.HashMap$Entry.<init>(HashMap.java:814)
+    			java.util.HashMap.createEntry(HashMap.java:901)
+    			java.util.HashMap.addEntry(HashMap.java:888)
+    			java.util.HashMap.put(HashMap.java:509)
+
+	ChainingHashMap: Memory Profile on congo.txt with empty.txt dictionary
+  		1) 0.04% of total memory allocated, 8 object allocations	
+    			java.util.HashMap.inflateTable(HashMap.java:320)
+    			java.util.HashMap.put(HashMap.java:492)
+    			sun.misc.JarIndex.addToList(JarIndex.java:158)
+    			sun.misc.JarIndex.read(JarIndex.java:327)
+
+	ChainingHashMap:  on shakespeare.txt with empty.txt dictionary
+		Nothing takes up more than .03% of total memory allocated and thus does not appear on the percent breakdown.
+
+ANALYSIS:
+Obviously the relative memory allocation load on the empty dictionary is trivial 
+— nothing is inserted so we are just left with the initial ArrayList creation, 
+which is inconsequential especially compared with larger files like 
+shakespeare.txt who use I/O allocations extensively.
+
+-------------------------------------------------
+TIMING PROFILES: CHAINING HASH MAP
+-------------------------------------------------
+
+--Timing Profile Running ChainingHashMap on congo.txt with empty.txt dictionary
+	CPU TIME (ms) BEGIN (total = 51091) Thu Apr 10 21:39:31 2014
+	rank   self  accum   count trace method
+ 	 48  0.54% 62.02%   55230 305078 ChainingHashMap.find
+ 	 50  0.52% 63.06%   55230 305073 ChainingHashMap.hash
+  	94  0.25% 79.64%   55230 305079 ChainingHashMap.has
+ 	153  0.11% 90.20%   55230 305071 ChainingHashMap.abs
+
+--Timing Profile Running ChainingHashMap on shakespeare.txt with empty.txt dictionary
+	rank   self  accum   count trace method
+	50  0.48% 63.31%  930782 305074 ChainingHashMap.hash
+    		ChainingHashMap.hash(ChainingHashMap.java:Unknown line)
+   		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+  		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+   		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+	52  0.47% 64.25%  930782 305079 ChainingHashMap.find
+    		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+	
+	83  0.33% 76.14%  930782 305077 java.util.ArrayList.get
+    		java.util.ArrayList.get(ArrayList.java:Unknown line)
+    		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+	101  0.22% 81.26%  930782 305080 ChainingHashMap.has
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+	168  0.09% 91.55%  930782 305072 ChainingHashMap.abs
+    		ChainingHashMap.abs(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.hash(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+
+--Timing Profile Running ChainingHashMap on congo.txt with cracklib.txt dictionary
+
+  	 9  0.66% 70.51%      13 304799 ChainingHashMap.grow
+		TRACE 304799:
+    		ChainingHashMap.grow(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.insert(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.loadDictionary(ChainingHashMapSpell.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+  	39  0.27% 82.25%   58982 304798 ChainingHashMap.insert
+		TRACE 304798:
+    		ChainingHashMap.insert(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.grow(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.insert(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.loadDictionary(ChainingHashMapSpell.java:Unknown line)
+ 
+ 	41  0.26% 82.77%  108107 304751 ChainingHashMap.hash
+		TRACE 304751:
+    		ChainingHashMap.hash(ChainingHashMap.java:Unknown line)
+   		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+   		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.insert(ChainingHashMap.java:Unknown line)
+
+	45  0.21% 83.70%   55230 305289 ChainingHashMap.find
+		TRACE 304751:
+    		ChainingHashMap.hash(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.insert(ChainingHashMap.java:Unknown line)
+  
+	46  0.20% 83.91%   49125 304770 ChainingHashMap.insert
+		TRACE 304770:
+    		ChainingHashMap.insert(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.loadDictionary(ChainingHashMapSpell.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+--Timing Profile Running ChainingHashMap on shakespeare.txt with cracklib.txt dictionary
+
+	 28  0.84% 58.93%  930782 305287 ChainingHashMap.find
+		TRACE 305287:
+    		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+ 	 44  0.56% 70.17%  930782 305284 ChainingHashMap.hash
+		TRACE 305284:
+    		ChainingHashMap.hash(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+  	 59  0.39% 77.01% 1361468 304771 ChainingHashMap$Entry.equals
+		TRACE 304771:
+   		ChainingHashMap$Entry.equals(ChainingHashMap.java:Unknown line)
+    		java.util.ArrayList.indexOf(ArrayList.java:Unknown line)
+   		ChainingHashMap.find(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+
+ 	 73  0.27% 81.42%  930782 305288 ChainingHashMap.has
+		TRACE 305288:
+    		ChainingHashMap.has(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+  	 
+	  88  0.15% 84.27%      13 304798 ChainingHashMap.grow
+		TRACE 304798:
+    		ChainingHashMap.grow(ChainingHashMap.java:Unknown line)
+    		ChainingHashMap.insert(ChainingHashMap.java:Unknown line)
+    		ChainingHashMapSpell.loadDictionary(ChainingHashMapSpell.java:Unknown line)
+    		ChainingHashMapSpell.main(ChainingHashMapSpell.java:Unknown line)
+
+ANALYSIS: On the cracklib libraries, it makes sense that grow should play 
+a significant role whereas it does not in the empty libraries, because these 
+never have anything inserted into them and thus never have any need to grow. 
+Proportionally, the shakespeare has more calls to find than to grow because 
+the dictionaries are the same size but the shakespeare file is much longer than 
+the congo file, causing many more ‘has’ calls to be necessary.  
+
+An interesing distinction in the timing profiles for congo.txt and shakespeare.txt
+is that for congo.txt growing and inserting were more demanding than for shakespeare.
+Then in shakespeare, find takes presedence. This makes sense, when Spell is ran for 
+congo, the act of loading the dictionary overpowers finding the mispelles words. However, 
+when ran with shakespeare, because the text file is much bigger than congo, looking up 
+words in the already loaded dictionary took presedence.
+
+
+At first glance it was astounding to see that the running times for an empty dictionary
+where significantly higher than those for cracklib.txt. Our expectation was that
+because the Hash Table had never grown, we would see a very fast completion time. 
+The Spell program would check if a word was in the table, and the table would always
+return false, given that all of its slots were null. However, looking at the times
+it was obvious that they were significantly larger. Moreover, they seemed to grow in
+O(n) time (congo.txt a much smaller text took 0.9 seconds on average, and shakespeare
+a much longer text took about 6.8 seconds on average). 
+
+Looking at the memory profile it was obvious that our expectation that the ArrayList
+would never grow held. There was never an insertation into the data structure, and this
+is confirmed by the empty dictionary allocations:
+
+--Memory Profile Running ChainingHashMap on congo.txt with empty.txt dictionary
+   80  0.04% 77.54%       640    8       640     8 300179 java.util.HashMap$Entry[]
+
+The only relevant line being the creation of 8 slots, for the initial Hash Table. 
+
+Therefore we were stumped. Why would this run, where finding that every word was not in
+the dictionary, was taking longer than a normal run. By taking a look at the timing profile,
+we saw that the Hash Table operations, were as expected, taking a small fraction of the 
+program's execution time, as expected. 
+
+--Timing Profile Running ChainingHashMap on congo.txt with empty.txt dictionary
+CPU TIME (ms) BEGIN (total = 51091) Thu Apr 10 21:39:31 2014
+rank   self  accum   count trace method
+  48  0.54% 62.02%   55230 305078 ChainingHashMap.find
+  50  0.52% 63.06%   55230 305073 ChainingHashMap.hash
+  94  0.25% 79.64%   55230 305079 ChainingHashMap.has
+ 153  0.11% 90.20%   55230 305071 ChainingHashMap.abs
+
+However, what we found from the timing profile was something that had escaped us until now:
+when the dictionary is empty, every single word in the congo.txt (and shakespeare.txt for 
+that matter) was sent to theIO. That is what was taking so long in the Spell program.
+Finding was of course a very easy computation, as the slot that corresponded to a word would 
+always be null. However, due to this, every single word was sent to System.out. This makes the case,
+that Java's I/O library is extremely cumbersome, and for a program that should execute quickly
+, it actually makes it slower. 
+
++++++++++++
+PROBLEM 3 +
++++++++++++
+
+(note: at the time the profilers were ran the java file was called PrimeOpenAddressHashMap
+we just changed the name to OpenAddressingHashMap to submit according to project specifications)
+
+The other method for resolving collisions on a hash table is to use Open Addressing.
+In this method, all the slots in the ArrayList hold an Entry, not an ArrayList of entries,
+therefore to solve collisions, it is important to have a way of determining a step, or probe
+for the next available spot from the collided has value. We decided to implement a 
+quadratic probing implementation. In this method, the probe follows the series of perfect 
+squares as the steps from the originally hashed slot. so if x slot proves a collision
+the next slot to visit is x + 1^2 and the next one x + 2^2 and so on. This method relies on 
+a load factor of 0.5 and also a hash table with a prime number size. This is so, because if the 
+probe and the size of the table are relatively prime, one can be sure that every slot will be 
+probed. Moreover, a loading factor of 0.5 as oposed to 0.9 was used to prevent losing constant
+assymptotic growth (with Open Addressing the lookup time will degrade if we let the table get 
+too loaded). 
+
+In order to grow our hash table we decided to create the private function returnPrime,
+which uses Java's BigInteger library in order to return likely prime numbers. This 
+function is a little expensive, but as the table grows is happens less and less frequently.
+
+We decided to use quadratic probing because it prevents the primary clustering
+caracteristic of linear probing, resulting in clusters of low efficiency values in our 
+table.
+
+Therefore this resulted in an implementation that while efficient was not as efficient
+as the chaining solution for collisions. However, it seemed to lag not too far behind. 
+
+===========CRACKLIB.txt=============
+-Loading Times
+--------------
+			congo.txt()		shakespeare.txt
+			0.56294			0.327433
+			0.505241		0.607998
+			0.469919		0.49434
+
+-Execution Times
+----------------
+			congo.txt()		shakespeare.txt
+			0.346353		1.612457
+			0.350952		1.617525
+			0.327433		1.597538
+---------------------------------------------------------
+Averages :		
+Load times :		0.5127			0.4765903333
+Execution Times :	0.3415793333		1.6091733333
+
+---------------------------------------------------------
+====================================
+
+===========EMPTY.txt================
+-Loading Times
+--------------
+			congo.txt()		shakespeare.txt
+			0.002006		0.001498
+			0.002177		0.002364
+			0.001771		0.001979
+
+-Execution Times
+----------------
+			congo.txt()		shakespeare.txt
+			0.961369		7.231256
+			0.755428		6.224918
+			0.739118		7.096476
+---------------------------------------------------------
+Averages :		
+Load times :		0.0019846667		0.001947
+Execution Times :	0.8186383333		6.8508833333
+---------------------------------------------------------
+====================================
+
+First of all we wanted to confirm that our implementation was allocating memory as we desired it
+via prime numbers, this would ensure that our quadratic probing of the array would touch 
+every single slot if necessary. 
+
+Memory Profiles:
+------------------
+OpenAddressHashMap From cracklib.txt on congo.txt
+
+		1)     2.05% of allocs, 1616904 bytes over 67371 allocs 301644 PrimeOpenAddressHashMap$Entry
+
+    			PrimeOpenAddressHashMap$Entry.<init>(PrimeOpenAddressHashMap.java:33)
+    			PrimeOpenAddressHashMap.insert(PrimeOpenAddressHashMap.java:212)
+    			PrimeOpenAddressHashMap.grow(PrimeOpenAddressHashMap.java:191)
+   			PrimeOpenAddressHashMap.insert(PrimeOpenAddressHashMap.java:208)
+
+		2)    18  0.94% of Allocs  370080 15420   1179000 49125 300993 PrimeOpenAddressHashMap$Entry
+
+OpenAddressHashMap From cracklib.txt on shakespeare.txt
+
+    		1)  2.80% 66.62%    808920 33705   1616904 67371 301643 PrimeOpenAddressHashMap$Entry
+    			PrimeOpenAddressHashMap$Entry.<init>(PrimeOpenAddressHashMap.java:33)/
+			PrimeOpenAddressHashMap.insert(PrimeOpenAddressHashMap.java:212)
+    			PrimeOpenAddressHashMap.grow(PrimeOpenAddressHashMap.java:191)
+    			PrimeOpenAddressHashMap.insert(PrimeOpenAddressHashMap.java:208)
+
+    		2)  1.28% 80.15%    370080 15420   1179000 49125 300992 PrimeOpenAddressHashMap$Entry
+   			PrimeOpenAddressHashMap$Entry.<init>(PrimeOpenAddressHashMap.java:33)
+    			PrimeOpenAddressHashMap.insert(PrimeOpenAddressHashMap.java:212)
+    			PrimeOpenAddressHashMapSpell.loadDictionary(PrimeOpenAddressHashMapSpell.java:23)
+    			PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:37)
+
+Again these allocations on 2) match the number of words in cracklib.txt and shakespeare.txt 
+respectively, but the growing by primes in OpenAddress hash map results in overall more 
+allocations because the primes are farther apart than just powers of 2, and again, 
+the array is copied over during each call to the grow method.
+
+OpenAddressHashMap From empty.txt on congo.txt
+  		625)  0.03% 95.52%       584    1       584     1 300388 PrimeOpenAddressHashMap
+		627)  0.03% 95.58%       584    1       584     1 300388 PrimeOpenAddressHashMap$Entry
+		
+OpenAddressHashMap from empty.txt on shakespeare.txt
+		Nothing takes up more than .03% of total memory allocated and thus does not appear on the percent breakdown.
+
+
+	OpenAddressHashMap from empty.txt on only allocates one Hash Map since the size is never increased and nothing is ever inserted.
+
+For the empty dictionary, the data made sense, there were no allocations of memory as the arrayList never had to 
+grow. 
+
+-------------------------------------------------
+TIMING PROFILES: OPEN ADDRESS HASH MAP
+-------------------------------------------------
+Then we moved on to analyze the timing profiles for the Quadratic Probing solution.
+
+-Timing Profile Running OpenAddressHashMap on congo.txt with cracklib.txt dictionary
+
+  15  0.43% 74.30%      13 305856 PrimeOpenAddressHashMap.grow
+	TRACE 305856:
+    	PrimeOpenAddressHashMap.grow(PrimeOpenAddressHashMap.java:Unknown line)
+    	PrimeOpenAddressHashMap.insert(PrimeOpenAddressHashMap.java:Unknown line)
+    	PrimeOpenAddressHashMapSpell.loadDictionary(PrimeOpenAddressHashMapSpell.java:Unknown line)
+    	PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+  
+  31  0.31% 80.03%   67371 305855 PrimeOpenAddressHashMap.insert
+	TRACE 306318:
+    	PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+    	PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+    	PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+  35  0.30% 81.25%   55230 306318 PrimeOpenAddressHashMap.find
+	TRACE 306318:
+    	PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+   	 PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+   	 PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+  37  0.29% 81.83%   49125 304770 PrimeOpenAddressHashMap.insert
+	TRACE 304770:
+   	 PrimeOpenAddressHashMap.insert(PrimeOpenAddressHashMap.java:Unknown line)
+	PrimeOpenAddressHashMapSpell.loadDictionary(PrimeOpenAddressHashMapSpell.java:Unknown line)
+   	 PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+- Timing Profile Running OpenAddressHashMap on shakespeare.txt with cracklib.txt dictionary
+	15  1.39% 45.53%  930782 306317 PrimeOpenAddressHashMap.find
+		TRACE 306317:
+   		 PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+	43  0.55% 70.05%  930782 306313 PrimeOpenAddressHashMap.hash
+		TRACE 306313:
+    		PrimeOpenAddressHashMap.hash(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+    		PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+	63  0.32% 78.63% 1184002 306316 PrimeOpenAddressHashMap$Entry.equals
+		TRACE 306316:
+    		PrimeOpenAddressHashMap$Entry.equals(PrimeOpenAddressHashMap.java:Unknown line)
+    		PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+    		PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+	72  0.25% 81.27%  930782 306318 PrimeOpenAddressHashMap.has
+		TRACE 306318:
+   		 PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+    		PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+
+The runs with the Open Addressing solution provided clarity about the expected runtimes. 
+First of all, the breakdowns of the way the Spell program was executing for congo.txt and 
+shakespeare.txt was the same as that of the Chaining solution. That is, in congo.txt
+the act of growing the arrayList and inserting the words of cracklib.txt overpowered
+the act of spell checking congo.txt. However, when the text file was big enough (in the 
+instance of shakespeare.txt) the act of looking up words overpowered the act of loading the
+dictionary. 
+
+However, as it is noticeable, in Open Addressing the times taken to run this methods, 
+take a larger percentage of execution time compared to those of Chaining. This makes
+complete sense. When not finding a key in the hashed slot, the data structure starts 
+probing the ArrayList in search for the key. If there are a lot of collisions this will
+make the probe go on for a long time (linearly to the size of collisions) to find the key, or 
+even find that it is in fact not even in the dictionary. Our solution with quadratic probing, 
+solve primary clustering, where values that are hashed near each other will create clusters
+of slow assymptotic growth. However, it did prove to be slower that Chaining due to the 
+active probing of the arraylist to find previous collisions. 
+
+- Timing Profile Running OpenAddressHashMap on shakespeare.txt with empty.txt dictionary
+	55  0.46% 65.39%  930782 305075 PrimeOpenAddressHashMap.hash
+		TRACE 305075:
+  		  PrimeOpenAddressHashMap.hash(PrimeOpenAddressHashMap.java:Unknown line)
+  		  PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+  		  PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+  	57  0.45% 66.30%  930782 305080 PrimeOpenAddressHashMap.find
+		TRACE 305080:
+ 		   PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+  		  PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+  		  PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+
+ 	103  0.22% 81.48%  930782 305081 PrimeOpenAddressHashMap.has
+		TRACE 305081:
+    		PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+    		PrimeOpenAddressHashMapSpell.main(PrimeOpenAddressHashMapSpell.java:Unknown line)
+	185  0.09% 93.06%  930782 305073 PrimeOpenAddressHashMap.abs
+		TRACE 305073:
+    		PrimeOpenAddressHashMap.abs(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMap.hash(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMap.find(PrimeOpenAddressHashMap.java:Unknown line)
+   		 PrimeOpenAddressHashMap.has(PrimeOpenAddressHashMap.java:Unknown line)
+
+
+This time, the data collected for the empty.txt dictionary did not befuddled us any longer
+It was obvious that the same type of Java I/O inneficiency was actually creating the much 
+delayed run times, and the horrendous assymptotic behavior with the empty dictionary. 
+
+Looking over both the memory and the timing profiler confirmed such speculation.
+
+-Timing Profile Running OpenAddressHashMap on congo.txt with empty.txt dictionary
+CPU TIME (ms) BEGIN (total = 46277) Thu Apr 10 21:14:25 2014
+rank   self  accum   count trace method
+  52  0.53% 63.37%   55230 305076 PrimeOpenAddressHashMap.hash
+  58  0.49% 66.43%   55230 305081 PrimeOpenAddressHashMap.find
+ 105  0.23% 81.94%   55230 305082 PrimeOpenAddressHashMap.has
+ 148  0.13% 89.51%   55230 305074 PrimeOpenAddressHashMap.abs
+ 
+ Here, we see that the relevant functions of the data structure are not the hotspot of
+ computational delay in the program. The real hotspots were caused by the fact that the entire
+ congo.txt had to be sent to the IO because all of it was "misspelled" due to having an empty
+ dictionary. 
+
+
+================================================================================================
+									END OF EXPERIMENTS
+
+
+-------------------------------------------------
+A word on Java inneficiency and time complexity -
+-------------------------------------------------
+Our experiments with the empty dictionary revealed that Java's I/O provides certain time delays 
+to the operation of the program. For both the chaining and the open address implementations
+the expected time complexity is expected to be O(1). However, as seen by run times, 
+As the files get bigger (shakespeare.txt compared to congo.txt) there is an increase in run time.
+While this is somewhat expected due to the growing of the hash table and rehashing of elements, 
+an additional explanation for longer run times when run with shakespeare is the fact that
+Spell needs to print 54484 incorrect words instead of the 1405 printed by congo.txt when ran
+on the cracklib.txt dictionary.
+
+
+----------------
+CLOSING REMARKS-
+----------------
+In this project we implemented two different collision resolution strategies to a hash
+table implementation that would represent a map. The map was used to identify spelling mistakes
+in text files, with a given dictionary. It was found that for big enough text files, the act
+of looking up for mispelled words (that is the find method) shadows the act of loading 
+the dictionary in the first place, for both solutions. 
+
+We also found, non-surprisingly that the chaining resolution performs faster that the open
+address resolution (with quadratic probing). However, by not much, and in bigger data files, 
+this distinction does not incapacitate the OpenAddressing solution (in fact looking up for
+shakespeared took on average a 0.1 seconds less time than with Chaining). 

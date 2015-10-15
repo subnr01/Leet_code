@@ -1,0 +1,348 @@
+Jose Nino Rivera jnino1@jhu.edu
+Elliott Binder ebinder1@jhu.edu
+600.226 Data Structures
+Assignment 7: Whispering Trees
+4/04/14
+
++++++++++++
+PROBLEM 1 +
++++++++++++
+In problem 1, it was easy to tell why a Binary Search Tree would not cut it as our best 
+implementation for a BinarySearchTree. When ran with dictionary.txt or cracklib.txt 
+the program broke because the call stack overflew due to recurssion call going down the very
+very unbalanced tree (everything was being inserted to the right).
+
+Therefore we build smaller versions of dictionary and cracklib (5k, 10k ordered words) using
+a small Java program Shuffler.java. When ran with 5k and then 10k the time it took to complete 
+the Words program doubled.
+
+smaller5k_dictionary.txt      smaller10k_dictionary.txt
+0.945531                      2.631593
+1.025077                      2.753828
+0.989449                      2.654422
+
+smaller5k_cracklib.txt        smaller10k_cracklib.txt                     
+1.108421                      2.677491
+1.053126                      2.63036
+1.043618                      2.688299
+
+This exhibits the fact that when inserting an ordered list of keys, the simple BinarySearcTree
+gets very very unbalanced, and is essentially a linked list, showing an O(n) behavior, opposed to
+the O(logn) behavior we want to achieve. 
+
+This data is corroborated by taking a look at the timing profiles for Words ran with a BSTM 
+implementation for the 10k ordered data and the 10k shuffled data
+
+-----Timing Data for smaller10k_dictionary.txt----BSTM
+CPU TIME (ms) BEGIN (total = 294,333) Fri Apr  4 18:45:38 2014
+rank   self  accum   count trace method
+   1 37.41% 37.41% 36862161 304484 BinarySearchTreeMap.insert
+   2 13.56% 50.97%    9998 304451 BinarySearchTreeMap.find
+   3 13.55% 64.51%    9998 304624 BinarySearchTreeMap.find
+
+-----Timing Data for smaller10k_dictionary.txt Shuffled----BSTM
+CPU TIME (ms) BEGIN (total = 17373) Fri Apr  4 22:17:37 2014
+rank   self  accum   count trace method
+   1  3.34%  3.34%  105785 304314 java.util.regex.Pattern$CharProperty.match
+   2  2.98%  6.31%  144739 304484 BinarySearchTreeMap.insert
+  12  1.34% 25.60%    9998 304451 BinarySearchTreeMap.find
+  13  1.26% 26.86%    9998 304616 BinarySearchTreeMap.find
+
+The first obvios and apparent difference is the total CPU time to run both implementations. 
+While the ordered dictionary took 294,333ms the shuffled dictionary with the same words 
+took only 17,373ms. Moreover, it is obvious from the CPU ranks that find and insert both
+took up a much smaller percentage of the computing time (5.94% vs 64.51%). This makes 
+complete sense, in the ordered input, the BSTM creates what is basically a linked list 
+(inserting nodes only to the right child); however, in the shuffled input,
+the tree is less biased, making the operations much more close to the desired O(logn) complexity. 
+
+Running a couple more files (including the complete dictionary.txt and cracklib.txt, both shuffled),
+let us show that with about random input, the BSTM works on an almost logarithmic complexity, this was
+done by plotting the average time versus the amount of words in each file on excel.
+
+
+(This were the files ran)
+kafka.tx  marx.t  einstein  dewey.tx goldman bible.tx quoran. war.txt shuffled_d  shuffled_c
+0.332034  0.2703  0.387328  0.702435 0.62546 1.331006 0.82498 1.19710 2.444684    0.956952
+0.303589  0.3120  0.433899  0.730671 0.57734 1.322334 0.85575 1.14661 2.571003    0.903915
+0.372464  0.2795  0.388843  0.753513 0.60350 1.339422 0.83239 1.29637 2.576041    0.961676
+
+
+In conclusion the normal BinarySearchTree is a poor implementation based on the fact that if the 
+data is heavily biased, ordered for instance, then the tree will be greatly unbalanced, provoking
+all the operations to lose the desired O(logn) complexity we wanted to achieve by implementing a 
+binary tree for our OrderedMap interface. 
+
+The amount of memory to construct the tree makes absolute sense. a BinarySearchTreeMap node is created
+for every single unique key inserted. An obvious example is that when Words was ran with the BSTM implementation
+it reported the following memory profile 
+
+-----Memory Data for smaller10k_dictionary.txt----BSTM
+SITES BEGIN (ordered by live bytes) Fri Apr  4 18:32:59 2014
+          percent          live          alloc'ed  stack class
+ rank   self  accum     bytes objs     bytes  objs trace name
+    1 27.58% 27.58%   2359632 2269  21009312 20010 300277 char[]
+    2 11.23% 38.80%    960576 20012    965760 20120 300170 java.nio.HeapCharBuffer
+    3  5.61% 44.41%    479904 9998    479904  9998 300965 char[]
+    4  5.14% 49.55%    439720 9998    439720  9998 300969 char[]
+    5  4.44% 53.98%    379632 9997    379680  9999 300938 char[]
+    6  3.74% 57.72%    319808 9994    319808  9994 300956 BinarySearchTreeMap$Node
+    (The other 4 nodes are created in different trace calls that did not appear in the summary)
+
+Because there are 10000 unique keys in the file, we expected 9998 (due to the regex in Words) 
+unique keys (and therefore Nodes) in the tree, which correlated with results shown above.
+
+
+*********************
+A WORD ON BALANCING *
+*********************
+With the first problem we saw that the normal BinarySearchTreeMap implementation will not 
+cut it for heavily biased input. What we mean by this is twofold. Firstly, if the data is 
+so biased (like dictionary.txt and cracklib.txt), where it is completely ordered, the tree 
+won't even be able to be constructed due to overflowing the recursion stack. But even, 
+if the data is small enough to not overflow the stack, then it creates a very faulty tree, 
+where sometimes our logarithmic complexity will be lost. This is what we called an unbalanced tree. 
+
+In class we discussed two ways to balance a tree in order to avoid bad times if the input is 
+heavily biased: and AVL tree and  a Treap. In problem 2 we provide analysis for an AVL tree 
+and in problem 3 we provide analysis for a Treap. After both independent analyses, we will close 
+with a conclusion on balancing. 
+
++++++++++++
+PROBLEM 2 +
++++++++++++
+With an AVL tree we correct the unbalancing predilection faced by BSTM by keeping track of the 
+heights of each node's children. So for example:
+
+			Root
+			 |
+			 v
+			 4       Height 1
+			/ \
+		   V   V
+		   1   6     Height 0
+
+And with this information then, it is possible to calculate the Balance Factor of each node 
+(height of left node-height of right node). According to the AVL definition, a node is 
+unbalanced if it has a balancing factor greater that |1|. To fix this, we execute rotations 
+on the tree. Of note is that there are 4 different types of possible Unbalanced trees, and each 
+is fixed by rotating differently. 
+
+The point of balancing is that after each insertion/deletion, becuase they are recursively 
+called on the root of the tree, as the recursions go up, it is imperative to recalculate 
+the heights of each node and balance if necessary. Therefore, even if the input was heavily 
+biased like in smaller10k_dictionary.txt, the recursive rotation will fix the tree preventing 
+it from been heavily biased. This provides two obvious advantages over  the BSTM. First, there 
+wont be a logical situation (at least in the scope of this class) where the recurssion stack
+would overflow. Second, even if the the input is heavily biased, the tree structure will not allow
+this and force a balanced tree through rotations. This makes it fact that no matter what the 
+input is, the complexity of any operation on the tree will be O(logn) because the height of the tree
+will be at most logn.
+
+This clear advantage is seen by looking at the times it took to run Words on the AvlTreeMap data
+structure for smalled5k_dictionary.txt and 10k and smaller5k_cracklib.txt and 10k.
+
+smaller5k_dictionary.txt  smaller10k_dictionary.txt
+0.382605                  0.54302 
+0.319458                  0.528606   
+0.33257                   0.549468  
+
+smaller5k_cracklib.txt    smaller10k_cracklib.txt
+0.323518 				  0.544328
+0.323862				  0.550101
+0.323998				  0.555172	
+
+This times contrast greatly with the times observed for the BSTM implementation which was
+considerably slower on this same input. This is due to the fact, that this implementation
+is enforcing a balancing heuristic based on height that helps the tree ensure that at any 
+amount or type of input the ordering will be balanced. 
+
+This statement can be confirmed by taking a look at the Timing profiles for one of the 10k
+files 
+
+----Timing for smaller10k_dictionary.txt----AVL
+CPU TIME (ms) BEGIN (total = 18,669) Fri Apr  4 18:59:11 2014
+rank   self  accum   count trace method
+   1  2.98%  2.98%  107288 304496 AvlTreeMap.insert
+   2  2.84%  5.83%  105802 304314 java.util.regex.Pattern$CharProperty.match
+   3  2.53%  8.36%  105614 304308 java.nio.CharBuffer.charAt
+   4  2.37% 10.73%  107288 304497 AvlTreeMap.recalcHeight
+   5  2.17% 12.91%  127256 304490 AvlTreeMap.balanceFactor
+   6  1.93% 14.84%  116219 304307 java.nio.HeapCharBuffer.get
+   7  1.83% 16.66%  105614 304310 java.lang.Character.codePointAt
+   8  1.82% 18.48%  351852 304488 AvlTreeMap.height
+
+It is clear from these results that the while insert is still the method that takes up the most
+time percentage its 2.98% is far less consuming than the 37% observed for the BSTM implementation. 
+Another interesting fact that can be abstracted from this data is that the recalcHeight, balanceFactor, 
+and height operations are operations that take up considerable time in this implementation. This is the
+price to pay to keep and ensure that regardless of input into the AVL tree, the tree will always be balanced
+and that it will have O(logn), with the exception of when rebalancing needs to take place. 
+
+However, by evidenced by timing profiles of larger files, for instance war and peace (war.txt) this 
+timing price becomes minimal, compared to ensuring that the tree operations will always be logarithmic
+
+-----Timing Data for war.txt----AVL
+CPU TIME (ms) BEGIN (total = 367061) Fri Apr  4 19:04:56 2014
+rank   self  accum   count trace method
+  11  1.87% 44.66%  554288 304548 AvlTreeMap.find
+  12  1.85% 46.51%  554288 304494 AvlTreeMap.find
+  17  1.30% 32.10%  107288 304498 AvlTreeMap.balance
+  49  0.32% 80.39%  554288 304549 AvlTreeMap.findForSure
+  51  0.31% 81.02%  554288 304551 AvlTreeMap.get
+  54  0.31% 81.94%  534946 304557 AvlTreeMap.put
+  56  0.30% 82.53%  554288 304496 AvlTreeMap.has
+  57  0.30% 82.83%  534946 304556 AvlTreeMap.put
+  58  0.29% 83.12%  554288 304550 AvlTreeMap.get
+  59  0.29% 83.41%  554288 304495 AvlTreeMap.has
+  60  0.29% 83.69%  534946 304555 AvlTreeMap.findForSure
+  61  0.28% 83.98%  214900 304539 AvlTreeMap.insert
+  63  0.26% 84.50%  214900 304540 AvlTreeMap.recalcHeight
+  68  0.21% 85.66%  243692 304533 AvlTreeMap.balanceFactor
+  76  0.18% 87.17%  702720 304531 AvlTreeMap.height
+
+Here we see that for really big files, the AVL implementation does not even pay that much
+to reap the benefits of having a well balanced tree; making it easier and faster to find,
+insert, delete key mappings in our tree. 
+
+-----Timing Data for war.txt----BSTM
+CPU TIME (ms) BEGIN (total = 369799) Fri Apr  4 18:58:41 2014
+rank   self  accum   count trace method
+  10  2.24% 43.17%  554288 304530 BinarySearchTreeMap.find
+  11  2.19% 45.36%  554288 304494 BinarySearchTreeMap.find
+  12  2.12% 47.48%  534946 304536 BinarySearchTreeMap.find
+
+Compared to the above result for the AVL tree, the BSTM implementation spends almost twice the 
+time percentage as the AVL tree in the find function. This is due to the fact that it is possible
+that the BSTM is less balanced than the AVL (which is strictly balanced). In general however,
+if the data is not heavily biased, that constant balancing of the AVL tree make the advantage 
+of having a strictly balanced tree be somewhat lost as seen by the following times
+
+kafka.txt marx.txt einstein.txt dewey.txt goldman.txt bible.txt quoran.txt war.txt  shuffled_d shuffled_c                                  
+0.342734  0.455457 0.376925     0.710795  0.572695    1.342856  0.81662    1.206738 2.550503   0.967138
+0.358184  0.288995 0.44889      0.672349  0.624965    1.355663  0.84063    1.15868  2.530322   0.913701
+0.321062  0.316558 0.380557     0.730664  0.56236     1.318404  0.81698    1.15549	2.581133   0.983434
+
+The times achieved by the AVL, when the input is decently random, are not significantly faster that
+those achieved by the BSTM implementation. However, when plotted against the number of words in the text file
+in excel it is evident that the implementation has an asymptotic complexity of O(logn) which is 
+exactly the type of confidence we want to have in our tree, hence it is paramount to have it be strictly
+balanced as is the case for the AVL tree.
+
+Lastly, it is of importance to note that like the BSTM implementation the AVL tree holds a unique node for
+each inque key value. This can be confirmed by taking a look at the memory profile for running 
+smaller10k_dictionary with Words on the AvlTreeMap.
+
+rank   self  accum     bytes objs     bytes  objs trace name
+    6  3.88% 57.41%    337840 8446    337840  8446 300957 AvlTreeMap$Node
+   27  0.36% 89.54%     31000  775     31000   775 300959 AvlTreeMap$Node
+   28  0.36% 89.90%     30960  774     30960   774 300960 AvlTreeMap$Node
+
+Similar to BSTM, it is possible to see that Words ran on smaller10K_dictionary.txt causes the creation on 9998 
+node objects. Above are listed the three most frequently used traces for node initiation. 
+
++++++++++++
+PROBLEM 3 +
++++++++++++
+Another option to balance trees are Treaps. While we cannot control how data is input into the tree, 
+which might cause unbalancing in BST, it is possible to include another piece of information that 
+influences the shape of the tree. 
+
+The idea for the Treap is to implemented so that insertions happen normally as they would in 
+the BST based on the BST ordering principle, but the nodes of the tree would be created
+with a random integer. This random integer would be use after insertion to balance the tree
+by following the ordering principle of a minimum heap. This way the randomness of the integers
+would simulate unbiased input and thus the tree would be balanced. 
+
+Moerover, when deleting, it would be possible just to rotate a node with two children to the base
+of the Treap (when it would have either one or 0 children) and then proceed to eliminate it. Therefore,
+this would avoid the search of a MAX value like the AVL did. 
+
+Initial Timing profiles show that indeed the Treap is faster at computing than the normal BSTM implementation
+when the input order is heavily biased. This is seen in the times it took to run both dictionary and cracklib 
+(both the 5k and 10K entries files).
+
+smaller5k_dictionary.txt  smaller10k_dictionary.txt
+0.35754					  0.566806		
+0.351584				  0.54534	
+0.337135				  0.53404	
+
+smaller5k_cracklib.txt 	  smaller10k_cracklib.txt               
+0.322512                  0.55246 
+0.324583                  0.580399 
+0.336725                  0.555809 
+                
+Moreover, when looking more closely at the Timing profile for one of this examples, smaller10k_dictionary.txt
+
+CPU TIME (ms) BEGIN (total = 16,717) Fri Apr  4 19:05:23 2014
+rank   self  accum   count trace method
+   6  1.87% 14.30%   80855 304509 TreapMap.insert
+  15  1.24% 27.79%    9998 304656 TreapMap.find
+  26  0.79% 38.55%    9998 304451 TreapMap.find
+  46  0.54% 51.24%   80855 304511 TreapMap.balance
+
+It is obvious that in comparison with the BSTM implementation, this tree does not accumulate a significant
+amount of its running time finding a particular node, due to the more appropriate balancing that it
+has. Even more interesting though is the fact that the implementation spends less time resources in
+the balancing method compared to the AVL tree. While the AVL tree spent 1.30% of its time in the balance
+function, the Treap spent only 0.54% of its time balancing the tree. This shows to us that for the AVL
+to be balanced we are spending computation power. 
+
+This means that the heavy balancing the AVL tree does might make the AVL implementation slower 
+(as seen by times, although not critically). However, there is a benefit to the way the AVL tree balances
+itself. Because it is done by height, we can always be sure that the AVL tree WILL be balnced, and that at 
+worse our assymptotic complexity will be O(logn) (in amortized time). However, with the Treap, we are depending
+on the randomness of the random number generator seeding the priorities to generate the Heap ordering. 
+
+This means that while we can be sure of the AVL timing complexity, we can only expect to see assymptotic complexity 
+of O(logn) for the Treap. That is, if the randomness of the priority numbers is biased, our tree shape will
+exhibit this baised, removing any benefit from balancing the tree according to heap ordering.
+
+However, based on the performance of the Treap with all the text files that were ran on the AVL tree and the BST Map
+implemenation it is reasonable to think that the java Random class is sufficient to generate unbiased
+random numbers, and create a blanced Treap.
+
+kafka.txt marx.txt einstein.txt dewey.txt goldman.txt bible.txt quoran.txt war.txt  shuffled_d shuffled_c                                  
+0.343484  0.455457 0.422852     0.703352  0.637256    1.508463  0.81662    1.312362 2.656553   0.907138
+0.326     0.288995 0.387487     0.793551  0.58564     1.480242  0.84063    1.271089 2.669643   0.913701
+0.325587  0.316558 0.40407      0.690201  0.598955    1.522931  0.81698    1.277365 2.743196   0.9115434
+
+Lastly, to confirm that the Treap was generating the appropriate number of node for the dataset ran on it,
+we took a look at the memory profile for the Words program ran with the Treap Map, on the smaller10k_dictionary.txt
+file.
+
+SITES BEGIN (ordered by live bytes) Fri Apr  4 18:34:55 2014
+          percent          live          alloc'ed  stack class
+ rank   self  accum     bytes objs     bytes  objs trace name
+    6  3.88% 57.41%    337840 8446    337840  8446 300957 AvlTreeMap$Node
+   27  0.36% 89.54%     31000  775     31000   775 300959 AvlTreeMap$Node
+   28  0.36% 89.90%     30960  774     30960   774 300960 AvlTreeMap$Node
+   (the remaining 3 nodes where created from contexts not caught by the memory profiler.)
+
+The profile accounts for the 9998 unique nodes required to run the files. 
+
+***************
+FINAL REMARKS *
+***************
+After implementing Three different data structures based on the Binary Search Tree, and using it to simulate
+a Map to run the Words program, to check Times, and both the Timing and Memory (we ran sampling, but the timing
+profile on the ordered smaller sets were sufficient to show the benefits of the implementations)
+we can see the benefits of every implementation. 
+
+If the input is mostly random and unbiased, for instance the literary texts, any BST map implementation will run
+on a very similar level as seen by run times. The BST will be somewhat unbiased but not so much as too
+make it be terribly slow and lose logarithmic complexity. 
+
+However, if the input is heavily biased (for instance in alphabetical order) then the BST shows the clear 
+disadvantages of not balancing the Tree. Therefore, by implementing the AVL tree and the Treap, each with 
+diffenrent balancing methods it was possibly to see recovery of assymptotic logarithmic complexity even
+for heavily baised input. 
+
+The last remark is that while we can be absolutely certain that the AVL tree will always be balanced,
+we need to have a reliable random number generator to make sure that the Treap is balanced. With aid 
+of evidence from running times, and profiles, we were able to conclude that Java's Random class is 
+reliable enough.
+
+Lastly, when comparing the output for all implementations, there were no differences, all words, counts where
+identical.
+

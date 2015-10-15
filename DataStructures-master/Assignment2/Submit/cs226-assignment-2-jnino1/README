@@ -1,0 +1,54 @@
+/**Jose Nino - jnino1@jhu.edu
+Data Structures Spring 2014
+Assignment 2 README
+*/
+
+Problem 1 - Revenge of Unique
+This version of Unique uses SimpleArrays, an implementation of the Interface Array<T>.
+The Unique class has a couple static methods and data members that allow it to read input from the user and produce a list of unique numbers. The main method uses a Scanner object to read the user input. It uses the insert function while there are integers. insert uses find, to figure out if the number has previously been used. If this is not the case, the number is inserted into the SimpleArray. If the SimpleArray has been filled, the expandArray function is called, and this double the array size without modyfying the values in the SimpleArray. Lastly control is passed back to main to print the numbers that were inserted into the SimpleArray, that is, the unique numbers.
+
+Problem 2 - Fleixble Arrays
+
+adt FlexibleArray
+	
+	uses
+		Any, Integer 
+
+	defines 
+		FlexibleArray
+
+	operations
+		new: Integer x Integer x T -/-> FlexibleArray<T>
+		set: FlexibleArray<T> x Integer x T -/-> FlexibleArray<T>
+		get: FlexibleArray<T> x Integer -/-> T
+		upperBound: FlexibleArray<T> --> Integer
+		lowerBound: FlexibleArray<T> --> Integer
+	
+	preconditions
+		new(i, n, t ): i <= n
+		set( a, i, t ):  i <= upperBound(a) and i >= lowerBound(a)
+		get( a, i ): i <= upperBound(a) and i >= lowerBound(a)
+	
+	axioms
+		upperBound( new(i, n, t )) = n
+		lowerBound( new(i, n, t)) = i
+		upperBound( set( a, i, t) ) = upperbound( a )
+		lowerBound( set(a, i, t) ) = lowerBound( a )
+		get( set( a, i, t ), j ) = if i = j then t else get( a, j )
+		get( new( i, n, t), j) = t
+
+This definition of FlexibleArrays is interesting, as the only change from a normal array are the lower and upper bounds of the array changing from 0 to the length-1 of the array to two arbitrary numbers. 
+
+My biggest design challenge was to decide in between having a bounds function (which returned both the upper and lower bound at the same time), or a separate upperBound and lowerBound function. I came to the conclusion that having two separate functions made the definition of a FlexibleArray cleaner. I took advantage of the universal truth of the axioms (as Peter told me, "axioms have no time an are always true"), to write axioms for both upperBound and lowerBound acting on new and set.
+
+I must be a conservative, because I prefer normal 0-->length of the array Arrays. This just seems more convenient, because it is always obvious which are the bound of the Array by just knowing length of the array, namely 0, and length-1. On the other hand, for FlexibleArrays, you need to keep in mind both boundaries, and this two only give you length, which as we saw in the adt, is not used. 
+
+Problem 3 - Sparse Arrays
+
+The SparseArray<T> implementation of the Array<T> interface is interesting. It is a linked list of Node<T>, but it only allocates Nodes when the user decides to change a certain index. 
+
+I implemented a private find method that returns a Node<T> object if there is one with the index of interest, or null if there is not. This private function is used by both get and set.
+
+I decided to implement my set function with two ideas in mind. First do not de allocate memory when set is called on an index and it is chaged to be the default value. This is so because time was already spent to allocate the memory of this Node and thus we dont want to waste it. Second, I decided not to allocate memory for a Node that didnt exist before if the user wants to change that index to the default value. It would be wasteful in two ways. First, it takes time to allocate memory and the list would not have new information about that index that it could not have produced before. Second, it adds an extra node to the list and thus makes searching in the future a longer process. I think this two principles go in line with the purpose of the SparseArray described in the assignment "A sparse array is an array in which relatively few positions have values that are different from the default value that was set when the array was created. For sparse arrays, it is wasteful to store the value of all positions explicitly since most of them never change." I think the user that uses a SparseArray would rarely change an index back to the default value. 
+
+The BetterTestArray class tests all three types of Arrays<T> that have been created in a polymorphic way. The test cases cover all precondtions and axioms, and make sure that each implementation is working according to the Array<T> adt from class. 

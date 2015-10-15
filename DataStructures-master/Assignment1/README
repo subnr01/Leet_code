@@ -1,0 +1,53 @@
+/*Jose Nino - jnino1@jhu.edu
+Data Structures - Assignment 1
+*/
+
+Problem 1
+My program has a big if statement protecting the program from an empty commandline. If args.length is greater, this means that the commandline has arguments. One array holds the values from the command line and the other one will hold booleans to enable the printing system to know which arguments could not be parsed. 
+
+Two nested for loops do the printing. The outer one will print the unique integers and the inner will check if the current number will be printed. Using the errors array I will skip arguments that could not be parsed. 
+
+Problem 2
+
+adt UglyArray
+
+	uses
+		Any, Integer, Boolean
+	
+	defines
+		UglyArray<T: Any>
+
+	operations
+		new: Integer -/-> UglyArray<T>
+		length: UglyArray<T> -> Integer
+		set: UglyArray<T> x Integer x T -/-> UglyArray<T>
+		get: UglyArray<T> x Integer -/-> T
+		check: UglyArray<T> x Integer -/-> Boolean
+
+	preconditions
+		new(i): i > 0
+		set(a,i,t): 0 <= i < length(a)
+		get(a,i): 0 <= i < length(a) and check(a,i) = True
+		check(a,i): 0 <= i < length(a)
+
+	axioms 
+		length(new(i)) = i
+		length(set(a,i,t)) = length(a)
+		get(set(a,i,t),j) = (if i = j then t else get(a,j))
+		check(new(n),i) = False
+		check(set(a,i,t),j) = (if i = j then True else check(a,j))
+
+For an uninintialized UglyArray, we have to incorporate a new operation, that I will call check. Because when a new array is created, there is no initial value in the array indeces. This function accepts an array and an integer(index) and returns a boolean, true if there is a value in the index and false if the index has never been initialized. This is a partial operation, as it must fulfill that the index is within the bounds of the array.
+
+This creates a difference from the original definition of Arrays. In an Array one of the axioms is that get(new(n,t),i) = t, because any index should contain the value of T the Array was initialized with. In our UglyArray, this is not true. Instead, check(new(n),i) returns False, which makes sense, because as soon as a new UglyArray is created, there is no value t of type T in any i index.
+
+Moreover, the function get needs another precondition. In Array, the index just has to be in the bounds of the array. In UglyArray, not only the index must be within the bounds of the Array, but also check(a,i) must return True. That is you can't get anything from an index that does not have a value yet. 
+
+Lastly, after the function set is called on a index i, to set it to the value t of type T, check(a,j) should return true if i=j. This is very important, because it says that after setting an index to a value, that index must be set to something, and thus check must be true, but all other indeces are not affected. 
+
+Problem 3
+BasicCounter is basic, and does not need much explanation. It resets to 0 and increases and decreases by 1.
+
+Squarecounter: to increase I use the Math.pow function which returns a double, so I needed to typecast it into an int. Decreasing I used Math.ceil to always round up. In the main this was tested for. I reset to 2, given that resetting to 0 would cause this counter to be useless. 
+
+FlexibleCounter accepts an initial value and a step in the constructor. The initial value is stored as a data member and used to reset the value in the reset function. This counter also allows for negative steps. This means up just adds the step, even if it is negative and subtracts the step even if it is negative. 
